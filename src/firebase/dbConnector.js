@@ -9,9 +9,13 @@ class dbConnector {
   }
 
   // Categories
-  getCategories = async () => {
-    return await Categories.getCategories()
+  getCategories = async (searchValue) => {
+    return await Categories.getCategories(searchValue)
   }
+
+  // getDataBasedOnSearch = async (searchValue) => {
+  //   return await Categories.getDataBasedOnSearch(searchValue)
+  // }
 
   saveNewOrder = async (categoryId, prodId, direction, currentOrder) => {
     return await Categories.saveNewOrder(categoryId, prodId, direction, currentOrder)

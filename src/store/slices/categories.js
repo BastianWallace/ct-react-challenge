@@ -2,41 +2,51 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import dbConnector from '../../firebase/dbConnector'
 
 export const fetchCategories = createAsyncThunk(
-  'categories/fetchCategories', async () => {
-    return await dbConnector.getCategories()
+  'categories/fetchCategories', async (searchValue = null) => {
+    return await dbConnector.getCategories(searchValue)
   }
 )
 
-export const saveFavorite = createAsyncThunk(
+const saveFavorite = createAsyncThunk(
   'categories/saveFavorite', async (prodId) => {
     return await dbConnector.saveFavorite(prodId)
   }
 )
 
-export const removeFavorite = createAsyncThunk(
+const removeFavorite = createAsyncThunk(
   'categories/removeFavorite', async (prodId) => {
     return await dbConnector.deleteFavorite(prodId)
   }
 )
 
-export const saveNewOrder = createAsyncThunk(
+const saveNewOrder = createAsyncThunk(
   'categories/saveNewOrder', async ({categoryId, prodId, direction, currentOrder}) => {
     return await dbConnector.saveNewOrder(categoryId, prodId, direction, currentOrder)
   }
 )
 
+// export const getDataBasedOnSearch = createAsyncThunk(
+//   'categories/getDataBasedOnSearch', async ({searchValue}) => {
+//     return await dbConnector.getDataBasedOnSearch(searchValue)
+//   }
+// )
+
 export const categoriesSlice = createSlice({
   name: 'categories',
   initialState: {
+    loadingCategories: true,
     list: [],
-    favorites: []
+    favorites: [],
+    searchValue: ''
   },
   extraReducers: {
     [fetchCategories.pending]: (state) => {
       state.status = 'loading'
+      state.loadingCategories = true
     },
     [fetchCategories.fulfilled]: (state, {payload}) => {
       state.status = 'success'
+      state.loadingCategories = false
       state.list = payload
       let favorites = []
 
@@ -49,10 +59,10 @@ export const categoriesSlice = createSlice({
       })
 
       state.favorites = favorites
-
     },
     [fetchCategories.rejected]: (state) => {
       state.status = 'failed'
+      state.loadingCategories = false
     },
     [saveFavorite.pending]: (state) => {
       state.status = 'loading'
@@ -74,6 +84,9 @@ export const categoriesSlice = createSlice({
     }
   },
   reducers: {
+    _setSearchValue: (state, {payload}) => {
+      state.searchValue = payload
+    },
     _setFavoriteON: (state, {payload}) => {
       const newFavorites = []
       state.list = state.list.map( cat => {
@@ -127,7 +140,18 @@ export const categoriesSlice = createSlice({
 })
 
 export default categoriesSlice.reducer
-const { _setFavoriteON, _setFavoriteOFF, _changeProdOrder } = categoriesSlice.actions
+const { _setFavoriteON, _setFavoriteOFF, _changeProdOrder, _setSearchValue } = categoriesSlice.actions
+
+export const searchByValue = (searchValue) => {
+  return (dispatch) => {
+    const setSearchValue = async () => {
+      dispatch(_setSearchValue(searchValue))
+      dispatch(fetchCategories(searchValue)).then(done => !done && dispatch(_setSearchValue('')))
+    }
+
+    return setSearchValue()
+  }  
+}
 
 export const addToFavorites = (prodId) => {
   return (dispatch) => {
