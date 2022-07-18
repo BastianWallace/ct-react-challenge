@@ -1,4 +1,4 @@
-import { collection, getDocs, addDoc, query, where, orderBy, writeBatch } from '@firebase/firestore'
+import { collection, getDocs, query, where, orderBy, writeBatch } from '@firebase/firestore'
 import { firebaseDB } from '../config'
 
 class Categories {
@@ -9,9 +9,10 @@ class Categories {
 
   constructor() {}
 
-  getCategories = async () => {
+  getCategories = async (searchValue = null) => {
+    const searchValueLower = searchValue ? searchValue.toLowerCase() : null
     const categoriesPromise = new Promise((resolve, reject) => {
-      const q = query(this.categoriesCollectionRef, orderBy('name'))
+      let q = query(this.categoriesCollectionRef, orderBy('name'))
 
       getDocs(q).then( result => {
         const categories = result.docs.map( doc => ({
@@ -20,7 +21,9 @@ class Categories {
         }))
 
         resolve(categories)
+     
       }).catch( err => {
+        //console.log(err)
         reject(err)
       })
     })
@@ -32,9 +35,11 @@ class Categories {
           ...doc.data(),
           id: doc.id
         }))
+
         resolve(productos)
+      
       }).catch( err => {
-        console.log(err)
+        //console.log(err)
         reject(err)
       })
     })
@@ -43,6 +48,7 @@ class Categories {
       getDocs(this.favoritesCollectionRef).then( result => {
         const favorites = result.docs.map( doc => doc.data().productId)
         resolve(favorites)
+      
       }).catch( err => {
         reject(err)
       })
@@ -60,7 +66,36 @@ class Categories {
       maxOrderNumber: Math.max(...products.filter(prod => prod.categoryId === category.id).map(item => item.orderNumber))
     }))
 
-    return data
+    let result = JSON.parse(JSON.stringify(data))
+
+    // filter products based on search
+    if(searchValueLower) {
+      
+      // filter categories by name with searchValueLower
+      const filteredCategories = data.filter( category => category.name.toLowerCase().includes(searchValueLower) )
+
+      // // loop over all categories that has products matching searchValueLower excluding categories from filteredCategories
+      const catsFilteredByProd = JSON.parse(JSON.stringify(data)).filter(category => {
+        if( !filteredCategories.some(cat => cat.id === category.id) ) {
+          const prods = category.products.filter(product => {
+            return product.name.toLowerCase().includes(searchValueLower)
+          })
+
+          if(prods.length > 0 && category.id) {
+            category.products = prods
+            return category
+          }
+        }
+      })
+
+      result = [...filteredCategories, ...catsFilteredByProd]
+    }
+
+    return result
+  }
+
+  getDataBasedOnSearch = async (searchValue) => {
+    return this.getCategories(searchValue)
   }
 
   saveNewOrder = async (categoryId, prodId, direction, currentOrder) => {
