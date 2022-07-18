@@ -19,6 +19,12 @@ export const removeFavorite = createAsyncThunk(
   }
 )
 
+export const saveNewOrder = createAsyncThunk(
+  'categories/saveNewOrder', async ({categoryId, prodId, direction, currentOrder}) => {
+    return await dbConnector.saveNewOrder(categoryId, prodId, direction, currentOrder)
+  }
+)
+
 export const categoriesSlice = createSlice({
   name: 'categories',
   initialState: {
@@ -68,7 +74,7 @@ export const categoriesSlice = createSlice({
     }
   },
   reducers: {
-    setFavoriteON: (state, {payload}) => {
+    _setFavoriteON: (state, {payload}) => {
       const newFavorites = []
       state.list = state.list.map( cat => {
         cat.products.map( prod => {
@@ -83,7 +89,7 @@ export const categoriesSlice = createSlice({
 
       state.favorites = [...state.favorites, ...newFavorites]
     },
-    setFavoriteOFF: (state, {payload}) => {
+    _setFavoriteOFF: (state, {payload}) => {
       state.list = state.list.map( cat => {
         cat.products.map( prod => {
           if(prod.id === payload) {
@@ -96,18 +102,38 @@ export const categoriesSlice = createSlice({
       })
 
       state.favorites = state.favorites.filter(fav => fav.id !== payload)
+    },
+    _changeProdOrder: (state, {payload}) => {
+      const {categoryId, prodId, direction, currentOrder} = payload;
+      const newOrderNumber = direction === 'left' ? currentOrder - 1 : currentOrder + 1
+
+      state.list = state.list.map(category => {
+        category.products.map(product => {
+          if (product.categoryId === categoryId) {
+            if (product.id === prodId) {
+              product.orderNumber = newOrderNumber
+            } else if (product.orderNumber === newOrderNumber) {
+              product.orderNumber = currentOrder
+            }
+          }
+          return product
+        })
+
+        category.products.sort((a, b) => a.orderNumber - b.orderNumber)
+        return category
+      })
     }
   }
 })
 
 export default categoriesSlice.reducer
-const { setFavoriteON, setFavoriteOFF } = categoriesSlice.actions
+const { _setFavoriteON, _setFavoriteOFF, _changeProdOrder } = categoriesSlice.actions
 
 export const addToFavorites = (prodId) => {
   return (dispatch) => {
     const add = async () => {
-      dispatch(setFavoriteON(prodId))
-      dispatch(saveFavorite(prodId)).then(saved => !saved && dispatch(setFavoriteOFF(prodId)))
+      dispatch(_setFavoriteON(prodId))
+      dispatch(saveFavorite(prodId)).then(saved => !saved && dispatch(_setFavoriteOFF(prodId)))
     }
 
     return add()
@@ -117,10 +143,25 @@ export const addToFavorites = (prodId) => {
 export const removeFromFavorites = (prodId) => {
   return (dispatch) => {
     const remove = async () => {
-      dispatch(setFavoriteOFF(prodId))
-      dispatch(removeFavorite(prodId)).then(removed => !removed && dispatch(setFavoriteON(prodId)))
+      dispatch(_setFavoriteOFF(prodId))
+      dispatch(removeFavorite(prodId)).then(removed => !removed && dispatch(_setFavoriteON(prodId)))
     }
 
     return remove()
   }  
+}
+
+export const changeProdOrder = (categoryId, prodId, direction, currentOrder) => {
+  return (dispatch) => {
+    const rearrange = async () => {
+      dispatch(_changeProdOrder({categoryId, prodId, direction, currentOrder}))
+      dispatch(saveNewOrder({categoryId, prodId, direction, currentOrder})).then(
+        changed => !changed && dispatch(
+          _changeProdOrder({categoryId, prodId, direction: direction === 'left' ? 'right' : 'left', currentOrder}
+        )
+      ))
+    }
+
+    return rearrange()
+  }
 }

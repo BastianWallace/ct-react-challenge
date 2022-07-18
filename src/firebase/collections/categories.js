@@ -1,4 +1,4 @@
-import { collection, getDocs, addDoc, query, where, writeBatch } from '@firebase/firestore'
+import { collection, getDocs, addDoc, query, where, orderBy, writeBatch } from '@firebase/firestore'
 import { firebaseDB } from '../config'
 
 class Categories {
@@ -11,7 +11,9 @@ class Categories {
 
   getCategories = async () => {
     const categoriesPromise = new Promise((resolve, reject) => {
-      getDocs(this.categoriesCollectionRef).then( result => {
+      const q = query(this.categoriesCollectionRef, orderBy('name'))
+
+      getDocs(q).then( result => {
         const categories = result.docs.map( doc => ({
           ...doc.data(),
           id: doc.id
@@ -24,13 +26,15 @@ class Categories {
     })
 
     const productosPromise = new Promise((resolve, reject) => {
-      getDocs(this.productsCollectionRef).then( result => {
+      const q = query(this.productsCollectionRef, orderBy('orderNumber'))
+      getDocs(q).then( result => {
         const productos = result.docs.map( doc => ({
           ...doc.data(),
           id: doc.id
         }))
         resolve(productos)
       }).catch( err => {
+        console.log(err)
         reject(err)
       })
     })
@@ -51,10 +55,44 @@ class Categories {
       products: products.filter(prod => prod.categoryId === category.id).map(product => ({
         ...product,
         favorite: favorites.some(fav => fav === product.id)
-      }))
+      })),
+      minOrderNumber: Math.min(...products.filter(prod => prod.categoryId === category.id).map(item => item.orderNumber)),
+      maxOrderNumber: Math.max(...products.filter(prod => prod.categoryId === category.id).map(item => item.orderNumber))
     }))
 
     return data
+  }
+
+  saveNewOrder = async (categoryId, prodId, direction, currentOrder) => {
+    const q = query(this.productsCollectionRef, where("categoryId", "==", categoryId), orderBy('orderNumber'))
+    const querySnapshot = await getDocs(q)
+
+    try {
+      // Get a new write batch
+      const batch = writeBatch(firebaseDB)
+      const newOrderNumber = direction === 'left' ? currentOrder - 1 : currentOrder + 1
+
+      querySnapshot.forEach( doc => {
+        // doc.data() is never undefined for query doc snapshots
+        const prod = {...doc.data(), id: doc.id}
+        if(prod.id === prodId) {
+          batch.update(doc.ref, {"orderNumber": newOrderNumber});
+        
+        } else if(prod.orderNumber === newOrderNumber) {
+          batch.update(doc.ref, {"orderNumber": currentOrder});
+        }
+      })
+
+      // Commit the batch
+      await batch.commit()
+
+      // Transaction successfully committed!
+      return true
+    
+    } catch (e) {
+      // Transaction failed
+      return false
+    }
   }
 }
 

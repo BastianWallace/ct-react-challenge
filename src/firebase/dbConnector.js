@@ -8,10 +8,17 @@ class dbConnector {
     //
   }
 
+  // Categories
   getCategories = async () => {
     return await Categories.getCategories()
   }
 
+  saveNewOrder = async (categoryId, prodId, direction, currentOrder) => {
+    return await Categories.saveNewOrder(categoryId, prodId, direction, currentOrder)
+  }
+  //
+
+  // Favorites
   getFavorites = async () => {
     return await Favorites.getFavorites()
   }
@@ -23,6 +30,7 @@ class dbConnector {
   deleteFavorite = async (prodId) => {
     return await Favorites.deleteFavorite(prodId)
   }
+  //
 }
 
 export default new dbConnector()
