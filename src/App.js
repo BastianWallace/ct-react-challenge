@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
 //import { useAuth } from './firebase/config'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 // Redux
 import { useDispatch, useSelector } from 'react-redux'
@@ -41,6 +43,18 @@ function App() {
           {content === 'favorites' && (
             <Favorites />
           )}
+
+          <ToastContainer
+            position="bottom-right"
+            autoClose={2000}
+            hideProgressBar
+            newestOnTop
+            closeOnClick={false}
+            rtl={false}
+            pauseOnFocusLoss
+            draggable={false}
+            pauseOnHover={false}
+          />
 
           {
             // USING PAGES INSTEAD OF CONTENTS

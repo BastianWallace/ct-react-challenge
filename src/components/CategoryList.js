@@ -22,23 +22,34 @@ const CategoryList = () => {
           return (
             <div key={`category-${cIndex}`} className="accordion-item mb-3">
               <div className="accordion-header" id={`panelsStayOpen-heading-${cIndex}`}>
-                <button className="accordion-button fs-l py-2" style={{backgroundColor:`#${category.color}`}} type="button" data-bs-toggle="collapse" data-bs-target={`#panelsStayOpen-collapse-${cIndex}`} aria-expanded="true" aria-controls={`panelsStayOpen-collapse-${cIndex}`}>
+                <button type="button" 
+                        className="accordion-button fs-l py-2" 
+                        style={{backgroundColor:`#${category.color}`}} 
+                        data-bs-toggle="collapse" 
+                        data-bs-target={`#panelsStayOpen-collapse-${cIndex}`} 
+                        aria-expanded="true" 
+                        aria-controls={`panelsStayOpen-collapse-${cIndex}`}>
                   {category.name}
                 </button>
               </div>
-              <div id={`panelsStayOpen-collapse-${cIndex}`} className="accordion-collapse collapse show" aria-labelledby={`panelsStayOpen-heading-${cIndex}`}>
+              <div id={`panelsStayOpen-collapse-${cIndex}`} 
+                    className="accordion-collapse collapse show" 
+                    aria-labelledby={`panelsStayOpen-heading-${cIndex}`}>
+
                 <div className="accordion-body">
                   <div className="container">
                     <div className="row justify-content-center">
-                      {
-                      category.products.map( (product, pIndex) => {
+                      {category.products.map( (product, pIndex) => {
                         return (
                           <div key={`product-${pIndex}`} className="col-3">
-                            <ProductCard product={product} />
+                            <ProductCard 
+                              product={product} 
+                              minOrderNumber={category.minOrderNumber} 
+                              maxOrderNumber={category.maxOrderNumber} 
+                            />
                           </div>
                         )
-                      })
-                      }
+                      })}
                     </div>
                   </div>
                 </div>
@@ -52,3 +63,9 @@ const CategoryList = () => {
 }
 
 export default CategoryList
+
+/*
+.sort((a, b) => {
+                          return a.orderNumber - b.orderNumber
+                        })
+*/

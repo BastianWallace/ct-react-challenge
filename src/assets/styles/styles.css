@@ -24,3 +24,8 @@
 .accordion .accordion-header > button {
   color: #000000;
 }
+
+/* Overwrite bootstrap focus style on buttons */
+.btn:focus {
+  /*box-shadow: none;*/
+}

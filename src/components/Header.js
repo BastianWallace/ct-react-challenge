@@ -8,6 +8,7 @@ const Header = () => {
   const { favorites } = useSelector(state => state.categories)
 
   const handleChangeContent = (event, content) => {
+    event.preventDefault()
     dispatch(changeContent(content))
   }
 
@@ -28,22 +29,19 @@ const Header = () => {
         <div className="collapse navbar-collapse" id="headerNav">
           <ul className="navbar-nav">
             <li className="nav-item">
-              <span 
-                className={`nav-link ${content === 'home' && 'active'}`}
-                type="button" 
-                onClick={event => handleChangeContent(event, 'home')}
-                {...(content === 'home' && {'aria-current': "page"})} >
-                  Home
-              </span>
+              {content === 'home' && (
+                <a type="button" className="nav-link active" aria-current="page" href="#">Home</a>
+              ) || (
+                <a type="button" className="nav-link" onClick={event => handleChangeContent(event, 'home')} href="#">Home</a>
+              )}
+              
             </li>
             <li className="nav-item">
-              <span 
-                className={`nav-link ${content === 'favorites' && 'active'}`}
-                type="button" 
-                onClick={event => handleChangeContent(event, 'favorites')}
-                {...(content === 'favorites' && {'aria-current': "page"})} >
-                  Favorites
-              </span>
+              {content === 'favorites' && (
+                <a type="button" className="nav-link active" aria-current="page" href="#">Favorites</a>
+              ) || (
+                <a type="button" className="nav-link" onClick={event => handleChangeContent(event, 'favorites')} href="#">Favorites</a>
+              )}
             </li>
           </ul>
         </div>
@@ -56,3 +54,5 @@ const Header = () => {
 }
 
 export default Header
+
+/*<a type="button" className="btn" onClick={event => handleChangeContent(event, 'home')}>Home</a>*/
