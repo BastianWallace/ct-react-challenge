@@ -16,11 +16,15 @@ const ProductCard = (props) => {
       image, 
       favorite, 
       categoryId, 
-      orderNumber
+      orderNumber,
+      addedToFavoritesOn
     }, 
     minOrderNumber, 
-    maxOrderNumber 
+    maxOrderNumber,
+    type
   } = props
+
+  //console.log(props.product)
 
   const { list: favorites } = useSelector(state => state.favorites)
   const [ imageLoaded, setImageLoaded ] = useState(false)
@@ -123,6 +127,10 @@ const ProductCard = (props) => {
           </button>
         </div>
       </div>
+
+      {type === 'favorites' && addedToFavoritesOn && (
+        <div className="text-center text-secondary mt-3">Added on {addedToFavoritesOn}</div>
+      )}
       
     </div>
   )

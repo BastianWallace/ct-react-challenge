@@ -7,7 +7,7 @@ import ProductCard from './ProductCard'
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const CategoryItem = (props) => {
-  const { category: {id, name, products, bgColor, textColor, minOrderNumber, maxOrderNumber} } = props
+  const { type, category: {id, name, products, bgColor, textColor, minOrderNumber, maxOrderNumber} } = props
   const [ expanded, setExpanded ] = useState(true)
   const dispatch = useDispatch()
 
@@ -69,6 +69,7 @@ const CategoryItem = (props) => {
                       product={product} 
                       minOrderNumber={minOrderNumber} 
                       maxOrderNumber={maxOrderNumber} 
+                      type={type}
                     />
                   </div>
                 )
