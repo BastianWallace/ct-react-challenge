@@ -1,21 +1,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import dbConnector from '../../firebase/dbConnector'
+import DbFavorites from '../../firebase/collections/dbFavorites'
 
 export const saveFavorite = createAsyncThunk(
   'favorites/saveFavorite', async (prodId) => {
-    return await dbConnector.saveFavorite(prodId)
+    return await DbFavorites.saveFavorite(prodId)
   }
 )
 
 export const deleteFavorite = createAsyncThunk(
   'favorites/deleteFavorite', async (prodId) => {
-    return await dbConnector.deleteFavorite(prodId)
+    return await DbFavorites.deleteFavorite(prodId)
   }
 )
 
 export const getFavorites = createAsyncThunk(
   'favorites/getFavorites', async () => {
-    return await dbConnector.getFavorites()
+    return await DbFavorites.getFavorites()
   }
 )
 

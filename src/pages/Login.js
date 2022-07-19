@@ -1,5 +1,4 @@
 import SignInForm from '../components/SignInForm'
-import { useSelector } from 'react-redux'
 
 const Login = () => {
   return (

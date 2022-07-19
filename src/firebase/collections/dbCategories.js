@@ -1,13 +1,87 @@
-import { collection, getDocs, query, where, orderBy, writeBatch } from '@firebase/firestore'
+import { collection, addDoc, getDocs, query, where, orderBy, limit, writeBatch } from '@firebase/firestore'
+import { ref, uploadBytes } from 'firebase/storage'
 import { firebaseDB } from '../config'
+import { storage } from '../config'
+import { v4 } from 'uuid'
 
-class Categories {
+class DbCategories {
 
   categoriesCollectionRef = collection(firebaseDB, 'categories')
   productsCollectionRef = collection(firebaseDB, 'products')
   favoritesCollectionRef = collection(firebaseDB, 'favorites')
 
   constructor() {}
+
+  newCategory = async (data, rejectWithValue) => {
+    const { name, bgColor, textColor } = data
+    const q = query(this.categoriesCollectionRef, where("name", "==", name))
+    const querySnapshot = await getDocs(q)
+
+    if(querySnapshot.size === 0) {
+      const docRef = await addDoc(collection(firebaseDB, "categories"), {
+        name: name,
+        bgColor: bgColor,
+        textColor: textColor
+      })
+
+      if(!docRef.id) {
+        return rejectWithValue("UNKNOWN_ERROR")
+      }
+
+      return docRef.id
+
+    } else {
+      return rejectWithValue("REPEATED_NAME")
+    }
+  }
+
+  newProduct = async (data, rejectWithValue) => {
+    const { name, categoryId, image } = data
+
+    const q = query(this.productsCollectionRef, where("name", "==", name))
+    const querySnapshot = await getDocs(q)
+
+    if(querySnapshot.size === 0) {
+      const imageRef = ref(storage, `products/product-${v4()}`)
+
+      try{
+        const q2 = query(this.productsCollectionRef, where("categoryId", "==", categoryId), orderBy('orderNumber', 'desc'), limit(1))
+        const querySnapshot2 = await getDocs(q2)
+
+        let orderNumber = 1
+
+        if(querySnapshot2.docs.length === 1) {
+          orderNumber = querySnapshot2.docs[0].data().orderNumber + 1
+        }
+
+        await uploadBytes(imageRef, image).then( async (res) => {
+          const imagePath = res.ref.fullPath.split('/')[1]
+
+          const docRef = await addDoc(collection(firebaseDB, "products"), {
+            name: name,
+            categoryId: categoryId,
+            image: imagePath,
+            orderNumber: orderNumber
+          })
+
+          if(!docRef.id) {
+            return rejectWithValue("UNKNOWN_ERROR")
+          }
+
+          return docRef.id
+
+        }).catch( err => {
+          return rejectWithValue("UPLOAD_ERROR")
+        })
+      
+      } catch (e) {
+        console.log(e)
+      }
+
+    } else {
+      return rejectWithValue("REPEATED_NAME")
+    }
+  }
 
   getCategories = async (searchValue = null) => {
     const searchValueLower = searchValue ? searchValue.toLowerCase() : null
@@ -160,20 +234,22 @@ class Categories {
       // Get a new write batch
       const batch = writeBatch(firebaseDB)
 
-      const q = query(this.categoriesCollectionRef, where("__name__", "==", catId))
-      const querySnapshot = await getDocs(q)
+      // Get the category by id
+      const queryCategory = query(this.categoriesCollectionRef, where("__name__", "==", catId))
+      const queryCategorySnapshot = await getDocs(queryCategory)
 
-      querySnapshot.forEach( doc => {
+      // Get all products where categoryId is the one to be deleted
+      const queryProducts = query(this.productsCollectionRef, where("categoryId", "==", catId))
+      const queryProductsSnapshot = await getDocs(queryProducts)
+
+      queryProductsSnapshot.forEach( doc => {
         // doc.data() is never undefined for query doc snapshots
         batch.delete(doc.ref)
       })
 
-      const q2 = query(this.productsCollectionRef, where("categoryId", "==", catId))
-      const querySnapshot2 = await getDocs(q2)
-
-      querySnapshot2.forEach( doc => {
+      queryCategorySnapshot.forEach( doc => {
         // doc.data() is never undefined for query doc snapshots
-        batch.update(doc.ref, {"categoryId": ""});
+        batch.delete(doc.ref)
       })
 
       // Commit the batch
@@ -189,4 +265,4 @@ class Categories {
   }
 }
 
-export default new Categories()
+export default new DbCategories()

@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { addToFavorites, removeFromFavorites, changeProdOrder, removeProduct } from '../store/slices/categories'
 import { useDispatch, useSelector } from 'react-redux'
+import TextTruncate from 'react-text-truncate'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
 
@@ -62,7 +63,7 @@ const ProductCard = (props) => {
 
   return (
     <div className="card p-4" style={{width: '100%'}}>
-      <div style={{width: '240px', height: '240px', maxWidth: '100%'}}>
+      <div className="position-relative" style={{width: '240px', height: '240px', maxWidth: '100%'}}>
         {!imageLoaded && (
           <div className="placeholder-glow" style={{width: '100%', height: '100%'}}>
             <div className="placeholder" style={{width: '100%', height: '100%'}}></div>
@@ -81,7 +82,8 @@ const ProductCard = (props) => {
       <div className="card-fav-button">
         {!favorite && !favorites.includes(id) && (
           <button type="button" className="btn-unstyled fs-4" onClick={handleAddToFavorite} title="Add to Favorites">
-            <i className="bi-heart"></i>
+            <i className="bi-heart-fill text-white prod-fav-icon-bg"></i>
+            <i className="bi-heart prod-fav-icon-body"></i>
           </button>
         ) || (
           <button type="button" className="btn-unstyled fs-4" onClick={handleRemoveFromFavorite} title="Remove from Favorites">
@@ -90,7 +92,14 @@ const ProductCard = (props) => {
         )}
       </div>
       
-      <h4 className="text-center pt-4">{name}</h4>
+      <h5 className="text-center mt-4 mb-3 product-card-name">
+        <TextTruncate
+          line={3}
+          element="span"
+          truncateText="…"
+          text={name}
+        />
+      </h5>
       
       <div className="d-flex">
         <div className="col-6 d-flex">

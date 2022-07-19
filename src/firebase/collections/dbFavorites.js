@@ -1,7 +1,7 @@
 import { collection, getDocs, addDoc, query, where, writeBatch } from '@firebase/firestore'
 import { firebaseDB } from '../config'
 
-class Favorites {
+class DbFavorites {
 
   categoriesCollectionRef = collection(firebaseDB, 'categories')
   productsCollectionRef = collection(firebaseDB, 'products')
@@ -48,4 +48,4 @@ class Favorites {
   }
 }
 
-export default new Favorites()
+export default new DbFavorites()

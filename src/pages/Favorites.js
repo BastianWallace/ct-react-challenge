@@ -7,7 +7,9 @@ const Favorites = () => {
 
   return (
     <div className="container-xxl flex-wrap flex-lg-nowrap">
-      <h3 className="py-4">Favorite list</h3>
+      <nav className="navbar bg-light mt-5 mb-2 px-3">
+        <h3 className="my-0 py-0">Favorite list</h3>
+      </nav>
 
       {
         // THIS IS NEEDED WHEN USE PAGES INSTEAD OF CONTENTS

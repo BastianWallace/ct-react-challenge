@@ -7,7 +7,7 @@ import ProductCard from './ProductCard'
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const CategoryItem = (props) => {
-  const { category: {id, name, products, color, minOrderNumber, maxOrderNumber} } = props
+  const { category: {id, name, products, bgColor, textColor, minOrderNumber, maxOrderNumber} } = props
   const [ expanded, setExpanded ] = useState(true)
   const dispatch = useDispatch()
 
@@ -30,19 +30,20 @@ const CategoryItem = (props) => {
   return (
     <div className="accordion-item mb-3">
       <div className="accordion-header" id={`panelsStayOpen-heading-${id}`}>
-        <div className="d-flex px-3 py-2 justify-content-between align-items-center" style={{backgroundColor:`#${color}`}}>
-          <div className="fs-5">{name}</div>
+        <div className="d-flex px-3 py-2 justify-content-between align-items-center" style={{backgroundColor:`${bgColor}`}}>
+          <div className="fs-5" style={{color:`${textColor}`}}>{name}</div>
           <div>
-            <button type="button" className="btn-unstyled fs-5 mx-2" onClick={handleDelete}>
+            <button type="button" className="btn-unstyled fs-5 mx-2" style={{color:`${textColor}`}} onClick={handleDelete}>
               <i className="bi-trash3"></i>
             </button>
             <button 
               type="button" 
-              className="btn-unstyled fs-5 px-2 text-white bg-secondary" 
+              className="btn-unstyled fs-5 px-2" 
               data-bs-toggle="collapse" 
               data-bs-target={`#panelsStayOpen-collapse-${id}`} 
               aria-expanded="true" 
               aria-controls={`panelsStayOpen-collapse-${id}`}
+              style={{color:`${textColor}`}}
               onClick={() => {setExpanded(!expanded)}}>
                 {expanded && (
                   <i className="bi-caret-up-fill"></i>

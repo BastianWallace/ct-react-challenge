@@ -16,10 +16,9 @@ const CategoryList = () => {
 
   return (
     <div id="categoryList">
-      
-      <nav className="navbar">
-        <div className="container-fluid justify-content-between mt-5">
-          <h3>Categories</h3>
+      <nav className="navbar bg-light mt-5 mb-2">
+        <div className="container-fluid justify-content-between align-items-center px-3">
+          <h3 className="my-0 py-0">Categories</h3>
           <form className="d-flex col-4" role="search">
             <input 
               type="text" 
