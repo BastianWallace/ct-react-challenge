@@ -46,7 +46,7 @@ const Header = () => {
           </ul>
         </div>
         <div className="d-flex text-light">
-          favorites: {favorites.length}
+          {favorites.length} in favorites
         </div>
       </div>
     </nav>
