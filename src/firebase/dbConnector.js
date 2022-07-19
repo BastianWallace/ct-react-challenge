@@ -8,17 +8,21 @@ class dbConnector {
     //
   }
 
-  // Categories
+  // Categories & Products
   getCategories = async (searchValue) => {
     return await Categories.getCategories(searchValue)
   }
 
-  // getDataBasedOnSearch = async (searchValue) => {
-  //   return await Categories.getDataBasedOnSearch(searchValue)
-  // }
-
   saveNewOrder = async (categoryId, prodId, direction, currentOrder) => {
     return await Categories.saveNewOrder(categoryId, prodId, direction, currentOrder)
+  }
+
+  deleteProduct = async (prodId) => {
+    return await Categories.deleteProduct(prodId)
+  }
+
+  deleteCategory = async (catId) => {
+    return await Categories.deleteCategory(catId)
   }
   //
 

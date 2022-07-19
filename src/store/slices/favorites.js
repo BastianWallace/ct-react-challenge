@@ -39,7 +39,7 @@ export const favoritesSlice = createSlice({
       state.status = 'loading'
     },
     [saveFavorite.fulfilled]: (state, {payload}) => {
-      // this method is resolved by the addToList reducer called from addToFavorites
+      state.status = 'success'
     },
     [saveFavorite.rejected]: (state) => {
       state.status = 'failed'
@@ -48,7 +48,7 @@ export const favoritesSlice = createSlice({
       state.status = 'loading'
     },
     [deleteFavorite.fulfilled]: (state, {payload}) => {
-      // this method is resolved by the removeFromList reducer called from removeFromFavorites
+      state.status = 'success'
     },
     [deleteFavorite.rejected]: (state) => {
       state.status = 'failed'

@@ -129,6 +129,64 @@ class Categories {
       return false
     }
   }
+
+  deleteProduct = async (prodId) => {
+    try {
+      // Get a new write batch
+      const batch = writeBatch(firebaseDB)
+
+      const q = query(this.productsCollectionRef, where("__name__", "==", prodId))
+      const querySnapshot = await getDocs(q)
+
+      querySnapshot.forEach( doc => {
+        // doc.data() is never undefined for query doc snapshots
+        batch.delete(doc.ref)
+      })
+
+      // Commit the batch
+      await batch.commit()
+
+      // Transaction successfully committed!
+      return true
+    
+    } catch (e) {
+      // Transaction failed
+      return false
+    }
+  }
+
+  deleteCategory = async (catId) => {
+    try {
+      // Get a new write batch
+      const batch = writeBatch(firebaseDB)
+
+      const q = query(this.categoriesCollectionRef, where("__name__", "==", catId))
+      const querySnapshot = await getDocs(q)
+
+      querySnapshot.forEach( doc => {
+        // doc.data() is never undefined for query doc snapshots
+        batch.delete(doc.ref)
+      })
+
+      const q2 = query(this.productsCollectionRef, where("categoryId", "==", catId))
+      const querySnapshot2 = await getDocs(q2)
+
+      querySnapshot2.forEach( doc => {
+        // doc.data() is never undefined for query doc snapshots
+        batch.update(doc.ref, {"categoryId": ""});
+      })
+
+      // Commit the batch
+      await batch.commit()
+
+      // Transaction successfully committed!
+      return true
+    
+    } catch (e) {
+      // Transaction failed
+      return false
+    }
+  }
 }
 
 export default new Categories()

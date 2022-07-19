@@ -1,8 +1,11 @@
 import React, { useState } from 'react'
-import { addToFavorites, removeFromFavorites, changeProdOrder } from '../store/slices/categories'
+import { addToFavorites, removeFromFavorites, changeProdOrder, removeProduct } from '../store/slices/categories'
 import { useDispatch, useSelector } from 'react-redux'
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
+
+// SweetAlert2
+import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const ProductCard = (props) => {
   const { 
@@ -12,7 +15,7 @@ const ProductCard = (props) => {
       image, 
       favorite, 
       categoryId, 
-      orderNumber 
+      orderNumber
     }, 
     minOrderNumber, 
     maxOrderNumber 
@@ -40,6 +43,23 @@ const ProductCard = (props) => {
     dispatch(changeProdOrder(categoryId, id, 'right', orderNumber))
   }
 
+  const handleDelete = () => {
+
+    Swal.fire({
+      title: 'Do you really want to delete the product?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        dispatch(removeProduct(id))
+      }
+    })
+  }
+
   return (
     <div className="card p-4" style={{width: '100%'}}>
       <div style={{width: '240px', height: '240px', maxWidth: '100%'}}>
@@ -56,6 +76,18 @@ const ProductCard = (props) => {
           style={{maxWidth: '100%', maxHeight: '100%'}}
           onLoad={() => setImageLoaded(true)}
         />
+      </div>
+
+      <div className="card-fav-button">
+        {!favorite && !favorites.includes(id) && (
+          <button type="button" className="btn-unstyled fs-4" onClick={handleAddToFavorite} title="Add to Favorites">
+            <i className="bi-heart"></i>
+          </button>
+        ) || (
+          <button type="button" className="btn-unstyled fs-4" onClick={handleRemoveFromFavorite} title="Remove from Favorites">
+            <i className="bi-heart-fill text-primary"></i>
+          </button>
+        )}
       </div>
       
       <h4 className="text-center pt-4">{name}</h4>
@@ -77,15 +109,9 @@ const ProductCard = (props) => {
         </div>
 
         <div className="col-6 text-end">
-          {!favorite && !favorites.includes(id) && (
-            <button type="button" className="btn btn-outline-secondary" onClick={handleAddToFavorite}>
-              <i className="bi-heart"></i>
-            </button>
-          ) || (
-            <button type="button" className="btn btn-outline-secondary" onClick={handleRemoveFromFavorite}>
-              <i className="bi-heart-fill"></i>
-            </button>
-          )}
+          <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleDelete}>
+            <i className="bi-trash3"></i>
+          </button>
         </div>
       </div>
       

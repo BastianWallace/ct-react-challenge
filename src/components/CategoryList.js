@@ -1,11 +1,12 @@
 import React, {useRef} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { searchByValue } from '../store/slices/categories'
-import ProductCard from './ProductCard'
+
+import CategoryItem from './CategoryItem'
 
 const CategoryList = () => {
   const dispatch = useDispatch()
-  const searchInputRef = useRef();
+  const searchInputRef = useRef()
   const { list: categories, searchValue, loadingCategories } = useSelector(state => state.categories)
 
   const handleSearch = (event) => {
@@ -15,7 +16,7 @@ const CategoryList = () => {
 
   return (
     <div id="categoryList">
-
+      
       <nav className="navbar">
         <div className="container-fluid justify-content-between mt-5">
           <h3>Categories</h3>
@@ -50,42 +51,8 @@ const CategoryList = () => {
       {!loadingCategories && categories.length > 0 && (
         <div className="accordion">
           {categories.map( (category, cIndex) => {
-            return (
-              <div key={`category-${cIndex}`} className="accordion-item mb-3">
-                <div className="accordion-header" id={`panelsStayOpen-heading-${cIndex}`}>
-                  <button type="button" 
-                          className="accordion-button fs-l py-2" 
-                          style={{backgroundColor:`#${category.color}`}} 
-                          data-bs-toggle="collapse" 
-                          data-bs-target={`#panelsStayOpen-collapse-${cIndex}`} 
-                          aria-expanded="true" 
-                          aria-controls={`panelsStayOpen-collapse-${cIndex}`}>
-                    {category.name}
-                  </button>
-                </div>
-                <div id={`panelsStayOpen-collapse-${cIndex}`} 
-                      className="accordion-collapse collapse show" 
-                      aria-labelledby={`panelsStayOpen-heading-${cIndex}`}>
-
-                  <div className="accordion-body">
-                    <div className="container">
-                      <div className="row justify-content-center">
-                        {category.products.map( (product, pIndex) => {
-                          return (
-                            <div key={`product-${pIndex}`} className="col-3">
-                              <ProductCard 
-                                product={product} 
-                                minOrderNumber={category.minOrderNumber} 
-                                maxOrderNumber={category.maxOrderNumber} 
-                              />
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            return !category.hide && (
+              <CategoryItem key={`category-${cIndex}`} category={category} />
             )
           })}
         </div>
@@ -95,9 +62,3 @@ const CategoryList = () => {
 }
 
 export default CategoryList
-
-/*
-.sort((a, b) => {
-                          return a.orderNumber - b.orderNumber
-                        })
-*/
