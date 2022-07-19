@@ -1,39 +1,53 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import dbConnector from '../../firebase/dbConnector'
+import DbCategories from '../../firebase/collections/dbCategories'
+import DbFavorites from '../../firebase/collections/dbFavorites'
+
+
+const _newCategory = createAsyncThunk(
+  'categories/newCategory', async (data, { rejectWithValue }) => {
+    return await DbCategories.newCategory(data, rejectWithValue)
+  }
+)
+
+export const _newProduct = createAsyncThunk(
+  'categories/_newProduct', async (data, { rejectWithValue }) => {
+    return await DbCategories.newProduct(data, rejectWithValue)
+  }
+)
 
 export const fetchCategories = createAsyncThunk(
   'categories/fetchCategories', async (searchValue = null) => {
-    return await dbConnector.getCategories(searchValue)
+    return await DbCategories.getCategories(searchValue)
   }
 )
 
-const saveFavorite = createAsyncThunk(
-  'categories/saveFavorite', async (prodId) => {
-    return await dbConnector.saveFavorite(prodId)
+const _saveNewOrder = createAsyncThunk(
+  'categories/_saveNewOrder', async ({categoryId, prodId, direction, currentOrder}) => {
+    return await DbCategories.saveNewOrder(categoryId, prodId, direction, currentOrder)
   }
 )
 
-const removeFavorite = createAsyncThunk(
-  'categories/removeFavorite', async (prodId) => {
-    return await dbConnector.deleteFavorite(prodId)
+const _deleteProduct = createAsyncThunk(
+  'categories/_deleteProduct', async (prodId) => {
+    return await DbCategories.deleteProduct(prodId)
   }
 )
 
-const saveNewOrder = createAsyncThunk(
-  'categories/saveNewOrder', async ({categoryId, prodId, direction, currentOrder}) => {
-    return await dbConnector.saveNewOrder(categoryId, prodId, direction, currentOrder)
+const _deleteCategory = createAsyncThunk(
+  'categories/_deleteCategory', async (catId) => {
+    return await DbCategories.deleteCategory(catId)
   }
 )
 
-const deleteProduct = createAsyncThunk(
-  'categories/deleteProduct', async (prodId) => {
-    return await dbConnector.deleteProduct(prodId)
+const _saveFavorite = createAsyncThunk(
+  'categories/_saveFavorite', async (prodId) => {
+    return await DbFavorites.saveFavorite(prodId)
   }
 )
 
-const deleteCategory = createAsyncThunk(
-  'categories/deleteCategory', async (catId) => {
-    return await dbConnector.deleteCategory(catId)
+const _removeFavorite = createAsyncThunk(
+  'categories/_removeFavorite', async (prodId) => {
+    return await DbFavorites.deleteFavorite(prodId)
   }
 )
 
@@ -47,6 +61,12 @@ export const categoriesSlice = createSlice({
     searchValue: ''
   },
   extraReducers: {
+    [_newCategory.pending]: (state) => {state.statusNewCategory = 'loading'},
+    [_newCategory.fulfilled]: (state) => {state.statusNewCategory = 'success'},
+    [_newCategory.rejected]: (state) => {state.statusNewCategory = 'failed'},
+    [_newProduct.pending]: (state) => {state.statusNewProduct = 'loading'},
+    [_newProduct.fulfilled]: (state) => {state.statusNewProduct = 'success'},
+    [_newProduct.rejected]: (state) => {state.statusNewProduct = 'failed'},
     [fetchCategories.pending]: (state) => {
       state.status = 'loading'
       state.loadingCategories = true
@@ -71,18 +91,18 @@ export const categoriesSlice = createSlice({
       state.status = 'failed'
       state.loadingCategories = false
     },
-    [saveFavorite.pending]: (state) => {state.statusSaveFavorite = 'loading'},
-    [saveFavorite.fulfilled]: (state) => {state.statusSaveFavorite = 'success'},
-    [saveFavorite.rejected]: (state) => {state.statusSaveFavorite = 'failed'},
-    [removeFavorite.pending]: (state) => {state.statusRemoveFavorite = 'loading'},
-    [removeFavorite.fulfilled]: (state) => {state.statusRemoveFavorite = 'success'},
-    [removeFavorite.rejected]: (state) => {state.statusRemoveFavorite = 'failed'},
-    [deleteProduct.pending]: (state) => {state.statusRemoveProduct = 'loading'},
-    [deleteProduct.fulfilled]: (state) => {state.statusRemoveProduct = 'success'},
-    [deleteProduct.rejected]: (state) => {state.statusRemoveProduct = 'failed'},
-    [deleteCategory.pending]: (state) => {state.statusRemoveCategory = 'loading'},
-    [deleteCategory.fulfilled]: (state) => {state.statusRemoveCategory = 'success'},
-    [deleteCategory.rejected]: (state) => {state.statusRemoveCategory = 'failed'}
+    [_saveFavorite.pending]: (state) => {state.statusSaveFavorite = 'loading'},
+    [_saveFavorite.fulfilled]: (state) => {state.statusSaveFavorite = 'success'},
+    [_saveFavorite.rejected]: (state) => {state.statusSaveFavorite = 'failed'},
+    [_removeFavorite.pending]: (state) => {state.statusRemoveFavorite = 'loading'},
+    [_removeFavorite.fulfilled]: (state) => {state.statusRemoveFavorite = 'success'},
+    [_removeFavorite.rejected]: (state) => {state.statusRemoveFavorite = 'failed'},
+    [_deleteProduct.pending]: (state) => {state.statusRemoveProduct = 'loading'},
+    [_deleteProduct.fulfilled]: (state) => {state.statusRemoveProduct = 'success'},
+    [_deleteProduct.rejected]: (state) => {state.statusRemoveProduct = 'failed'},
+    [_deleteCategory.pending]: (state) => {state.statusRemoveCategory = 'loading'},
+    [_deleteCategory.fulfilled]: (state) => {state.statusRemoveCategory = 'success'},
+    [_deleteCategory.rejected]: (state) => {state.statusRemoveCategory = 'failed'}
   },
   reducers: {
     _setSearchValue: (state, {payload}) => {
@@ -191,6 +211,18 @@ const {
   _showCategory
 } = categoriesSlice.actions
 
+export const createCategory = (data) => async (dispatch) => {
+  await dispatch(_newCategory(data))
+  return await dispatch(fetchCategories())
+}
+
+export const createProduct = (data) => async (dispatch) => {
+  console.log('Create Product')
+  await dispatch(_newProduct(data))
+  console.log('Fetch Categories')
+  return await dispatch(fetchCategories())
+}
+
 export const searchByValue = (searchValue) => {
   return (dispatch) => {
     const setSearchValue = async () => {
@@ -199,14 +231,14 @@ export const searchByValue = (searchValue) => {
     }
 
     return setSearchValue()
-  }  
+  }
 }
 
 export const addToFavorites = (prodId) => {
   return (dispatch) => {
     const add = async () => {
       dispatch(_setFavoriteON(prodId))
-      dispatch(saveFavorite(prodId)).then(saved => !saved && dispatch(_setFavoriteOFF(prodId)))
+      dispatch(_saveFavorite(prodId)).then(saved => !saved && dispatch(_setFavoriteOFF(prodId)))
     }
 
     return add()
@@ -217,7 +249,7 @@ export const removeFromFavorites = (prodId) => {
   return (dispatch) => {
     const remove = async () => {
       dispatch(_setFavoriteOFF(prodId))
-      dispatch(removeFavorite(prodId)).then(removed => !removed && dispatch(_setFavoriteON(prodId)))
+      dispatch(_removeFavorite(prodId)).then(removed => !removed && dispatch(_setFavoriteON(prodId)))
     }
 
     return remove()
@@ -228,7 +260,7 @@ export const changeProdOrder = (categoryId, prodId, direction, currentOrder) => 
   return (dispatch) => {
     const rearrange = async () => {
       dispatch(_changeProdOrder({categoryId, prodId, direction, currentOrder}))
-      dispatch(saveNewOrder({categoryId, prodId, direction, currentOrder})).then(
+      dispatch(_saveNewOrder({categoryId, prodId, direction, currentOrder})).then(
         changed => !changed && dispatch(
           _changeProdOrder({categoryId, prodId, direction: direction === 'left' ? 'right' : 'left', currentOrder}
         )
@@ -243,7 +275,7 @@ export const removeProduct = (prodId) => {
   return (dispatch) => {
     const remove = async () => {
       dispatch(_hideProduct(prodId))
-      dispatch(deleteProduct(prodId)).then(removed => !removed && dispatch(_showProduct(prodId)))
+      dispatch(_deleteProduct(prodId)).then(removed => !removed && dispatch(_showProduct(prodId)))
     }
 
     return remove()
@@ -254,7 +286,7 @@ export const removeCategory = (catId) => {
   return (dispatch) => {
     const remove = async () => {
       dispatch(_hideCategory(catId))
-      dispatch(deleteCategory(catId)).then(removed => !removed && dispatch(_showCategory(catId)))
+      dispatch(_deleteCategory(catId)).then(removed => !removed && dispatch(_showCategory(catId)))
     }
 
     return remove()

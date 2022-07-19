@@ -19,7 +19,12 @@
 .fs-xxl {
   font-size: 2.5rem;
 }
+
 /* ------- */
+
+.unbreakable {
+  white-space: nowrap;
+}
 
 .accordion .accordion-header > button {
   color: #000000;
@@ -37,4 +42,41 @@
   padding: 0;
   margin: 0;
   z-index: 1;
+}
+
+.product-image {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
+.product-card-name {
+  height: 72px;
+  overflow: hidden;
+}
+
+.prod-fav-icon-bg, .prod-fav-icon-body {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+}
+
+.prod-fav-icon-body {
+  z-index: 2;
+}
+
+.form-switch {
+  height: 2rem;
+  margin-bottom: 10px;
+}
+.form-switch.custom-form-switch .form-check-input {
+  width: 4rem;
+  height: 2rem;
+  margin-top: 0;
+  margin-right: 0.5rem;
+}
+
+.form-switch.custom-form-switch .form-check-label {
+  line-height: 2rem;
 }

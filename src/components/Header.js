@@ -1,16 +1,15 @@
 import React from 'react'
-import { useDispatch, useSelector } from 'react-redux'
-import { changeContent } from '../store/slices/content'
+import { useSelector } from 'react-redux'
+import NavLinkItem from './NavLinkItem'
 
 const Header = () => {
-  const dispatch = useDispatch()
-  const { content } = useSelector(state => state.content)
   const { favorites } = useSelector(state => state.categories)
 
-  const handleChangeContent = (event, content) => {
-    event.preventDefault()
-    dispatch(changeContent(content))
-  }
+  const navItems = [
+    {title: 'Home', content: 'home'},
+    {title: 'Favorites', content: 'favorites'},
+    {title: 'Create Items', content: 'create'}
+  ]
 
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -28,21 +27,11 @@ const Header = () => {
         </button>
         <div className="collapse navbar-collapse" id="headerNav">
           <ul className="navbar-nav">
-            <li className="nav-item">
-              {content === 'home' && (
-                <a type="button" className="nav-link active" aria-current="page" href="#">Home</a>
-              ) || (
-                <a type="button" className="nav-link" onClick={event => handleChangeContent(event, 'home')} href="#">Home</a>
-              )}
-              
-            </li>
-            <li className="nav-item">
-              {content === 'favorites' && (
-                <a type="button" className="nav-link active" aria-current="page" href="#">Favorites</a>
-              ) || (
-                <a type="button" className="nav-link" onClick={event => handleChangeContent(event, 'favorites')} href="#">Favorites</a>
-              )}
-            </li>
+            {navItems.map((item, index) => {
+              return (
+                <NavLinkItem key={`navLink-${index}`} item={item} />
+              )
+            })}
           </ul>
         </div>
         <div className="d-flex text-light">
@@ -54,5 +43,3 @@ const Header = () => {
 }
 
 export default Header
-
-/*<a type="button" className="btn" onClick={event => handleChangeContent(event, 'home')}>Home</a>*/

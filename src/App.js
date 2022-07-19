@@ -12,6 +12,7 @@ import { fetchCategories } from './store/slices/categories'
 import Home from './pages/Home'
 //import Login from './pages/Login'
 import Favorites from './pages/Favorites'
+import CreateItems from './pages/CreateItems'
 
 // Components
 import Header from './components/Header'
@@ -44,6 +45,10 @@ function App() {
             <Favorites />
           )}
 
+          {content === 'create' && (
+            <CreateItems />
+          )}
+
           <ToastContainer
             position="bottom-right"
             autoClose={2000}
@@ -57,7 +62,7 @@ function App() {
           />
 
           {
-            // USING PAGES INSTEAD OF CONTENTS
+            // IF USING PAGES INSTEAD OF CONTENTS
             // <Routes>
             //   <Route exact path="/" element={<Home />} />
             //   <Route exact path="/favorites" element={<Favorites />} />
