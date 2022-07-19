@@ -1,42 +1,48 @@
 import React from 'react'
 import { useSelector } from 'react-redux'
-import ProductCard from '../components/ProductCard'
+import CategoryList from '../components/CategoryList'
 
 const Favorites = () => {
-  const { favorites } = useSelector(state => state.categories)
+  //const { favorites } = useSelector(state => state.categories)
+  const { list: categories } = useSelector(state => state.categories)
+  const { list: favorites } = useSelector(state => state.favorites)
+
+  let data = []
+
+  if(categories.length > 0) {
+    data = JSON.parse(JSON.stringify(categories)).filter(category => {
+      const prods = category.products.filter(product => {
+        const favoriteItem = favorites.find(favorite => favorite.productId === product.id)
+        product.addedToFavoritesOn = favoriteItem ? favoriteItem.createdDate : null
+        return product.favorite
+      })
+
+      if(prods.length > 0) {
+        category.products = prods
+        return true
+      }
+    })
+  }
 
   return (
     <div className="container-xxl flex-wrap flex-lg-nowrap">
-      <nav className="navbar bg-light mt-5 mb-2 px-3">
-        <h3 className="my-0 py-0">Favorite list</h3>
-      </nav>
-
       {
         // THIS IS NEEDED WHEN USE PAGES INSTEAD OF CONTENTS
-      // favorites.length === 0 && (
-      //   <div className="d-flex justify-content-center pb-4">
-      //     <div className="spinner-border text-secondary" role="status" style={{width: '3rem', height: '3rem'}}>
-      //       <span className="visually-hidden">Loading...</span>
-      //     </div>
-      //   </div>
-      // )
+        // favorites.length === 0 && (
+        //   <div className="d-flex justify-content-center pb-4">
+        //     <div className="spinner-border text-secondary" role="status" style={{width: '3rem', height: '3rem'}}>
+        //       <span className="visually-hidden">Loading...</span>
+        //     </div>
+        //   </div>
+        // )
       }
 
-      {favorites.length === 0 && (
-        <div className="d-flex justify-content-center pb-4">You don't products in your favorites list</div>
+      {data.length === 0 && (
+        <div className="d-flex justify-content-center py-5">You don't products in your favorites list</div>
+      ) || (
+        <CategoryList categories={data} type="favorites" />
       )}
 
-      <div className="container">
-        <div className="row justify-content-center">
-          {favorites.map( (product, pIndex) => {
-            return (
-              <div key={`product-${pIndex}`} className="col-3">
-                <ProductCard product={product} />
-              </div>
-            )
-          })}
-        </div>
-      </div>
     </div>
   )
 }

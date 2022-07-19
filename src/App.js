@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { Routes, Route } from 'react-router-dom'
 //import { useAuth } from './firebase/config'
 import { ToastContainer } from 'react-toastify';
@@ -6,6 +6,7 @@ import 'react-toastify/dist/ReactToastify.min.css';
 
 // Redux
 import { useDispatch, useSelector } from 'react-redux'
+import { getFavorites } from './store/slices/favorites'
 import { fetchCategories } from './store/slices/categories'
 
 // Pages
@@ -26,8 +27,11 @@ function App() {
   const { content } = useSelector(state => state.content)
 
   useEffect(() => {
+    dispatch(getFavorites())
     dispatch(fetchCategories())
   }, [dispatch])
+
+  console.log('App rendered!')
 
   return (
     <div className="App">

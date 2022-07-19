@@ -4,10 +4,13 @@ import { searchByValue } from '../store/slices/categories'
 
 import CategoryItem from './CategoryItem'
 
-const CategoryList = () => {
+const CategoryList = (props) => {
+  const { categories, type } = props
+  const displaySearch = type === 'all'
+  const title = type === 'favorites' ? 'Favorites' : 'Categories'
   const dispatch = useDispatch()
   const searchInputRef = useRef()
-  const { list: categories, searchValue, loadingCategories } = useSelector(state => state.categories)
+  const { searchValue, loadingCategories } = useSelector(state => state.categories)
 
   const handleSearch = (event) => {
     event.preventDefault()
@@ -18,18 +21,20 @@ const CategoryList = () => {
     <div id="categoryList">
       <nav className="navbar bg-light mt-5 mb-2">
         <div className="container-fluid justify-content-between align-items-center px-3">
-          <h3 className="my-0 py-0">Categories</h3>
-          <form className="d-flex col-4" role="search">
-            <input 
-              type="text" 
-              className="form-control me-2" 
-              id="searchInput" 
-              placeholder="search by product or category"
-              ref={searchInputRef} 
-              defaultValue={searchValue}
-            />
-            <button className="btn btn-primary" type="submit" onClick={handleSearch}>Search</button>
-          </form>
+          <h3 className="my-0 py-0 page-title">{title ? title : 'Categories'}</h3>
+          {displaySearch && (
+            <form className="d-flex col-4" role="search">
+              <input 
+                type="text" 
+                className="form-control me-2" 
+                id="searchInput" 
+                placeholder="search by product or category"
+                ref={searchInputRef} 
+                defaultValue={searchValue}
+              />
+              <button className="btn btn-primary" type="submit" onClick={handleSearch}>Search</button>
+            </form>
+          )}
         </div>
       </nav>
 
@@ -51,7 +56,7 @@ const CategoryList = () => {
         <div className="accordion">
           {categories.map( (category, cIndex) => {
             return !category.hide && (
-              <CategoryItem key={`category-${cIndex}`} category={category} />
+              <CategoryItem key={`category-${cIndex}`} category={category} type={type} />
             )
           })}
         </div>

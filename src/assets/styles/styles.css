@@ -44,6 +44,10 @@
   z-index: 1;
 }
 
+.page-title {
+  line-height: 38px;
+}
+
 .product-image {
   position: absolute;
   top: 50%;

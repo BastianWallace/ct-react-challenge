@@ -217,9 +217,7 @@ export const createCategory = (data) => async (dispatch) => {
 }
 
 export const createProduct = (data) => async (dispatch) => {
-  console.log('Create Product')
   await dispatch(_newProduct(data))
-  console.log('Fetch Categories')
   return await dispatch(fetchCategories())
 }
 

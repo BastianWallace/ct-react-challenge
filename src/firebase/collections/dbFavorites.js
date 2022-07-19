@@ -1,4 +1,4 @@
-import { collection, getDocs, addDoc, query, where, writeBatch } from '@firebase/firestore'
+import { collection, getDocs, addDoc, query, where, writeBatch, serverTimestamp, Timestamp } from '@firebase/firestore'
 import { firebaseDB } from '../config'
 
 class DbFavorites {
@@ -11,12 +11,23 @@ class DbFavorites {
 
   getFavorites = async () => {
     const favoritesDocs = await getDocs(this.favoritesCollectionRef)
-    return favoritesDocs.docs.map(doc => ({...doc.data()}))
+    try {
+      return favoritesDocs.docs.map(doc => ({
+        ...doc.data(),
+        createdDate: doc.data().createdDate.toDate().toDateString()
+      }))
+    } catch (e) {
+      console.log(e)
+    }
+
   }
+
+  //,createdDate: Timestamp.toDate(doc.data.createdDate)
 
   saveFavorite = async (prodId) => {
     const docId = await addDoc(this.favoritesCollectionRef, {
-      productId: prodId
+      productId: prodId,
+      createdDate: serverTimestamp()
     })
 
     return docId ? prodId : null
