@@ -25,16 +25,23 @@ const saveNewOrder = createAsyncThunk(
   }
 )
 
-// export const getDataBasedOnSearch = createAsyncThunk(
-//   'categories/getDataBasedOnSearch', async ({searchValue}) => {
-//     return await dbConnector.getDataBasedOnSearch(searchValue)
-//   }
-// )
+const deleteProduct = createAsyncThunk(
+  'categories/deleteProduct', async (prodId) => {
+    return await dbConnector.deleteProduct(prodId)
+  }
+)
+
+const deleteCategory = createAsyncThunk(
+  'categories/deleteCategory', async (catId) => {
+    return await dbConnector.deleteCategory(catId)
+  }
+)
 
 export const categoriesSlice = createSlice({
   name: 'categories',
   initialState: {
     loadingCategories: true,
+    statusRemoveProduct: null,
     list: [],
     favorites: [],
     searchValue: ''
@@ -64,28 +71,60 @@ export const categoriesSlice = createSlice({
       state.status = 'failed'
       state.loadingCategories = false
     },
-    [saveFavorite.pending]: (state) => {
-      state.status = 'loading'
-    },
-    [saveFavorite.fulfilled]: (state, {payload}) => {
-      // this method is resolved by the setFavoriteON reducer called from addToFavorites
-    },
-    [saveFavorite.rejected]: (state) => {
-      state.status = 'failed'
-    },
-    [removeFavorite.pending]: (state) => {
-      state.status = 'loading'
-    },
-    [removeFavorite.fulfilled]: (state, {payload}) => {
-      // this method is resolved by the setFavoriteOFF reducer called from removeFromFavorites
-    },
-    [removeFavorite.rejected]: (state) => {
-      state.status = 'failed'
-    }
+    [saveFavorite.pending]: (state) => {state.statusSaveFavorite = 'loading'},
+    [saveFavorite.fulfilled]: (state) => {state.statusSaveFavorite = 'success'},
+    [saveFavorite.rejected]: (state) => {state.statusSaveFavorite = 'failed'},
+    [removeFavorite.pending]: (state) => {state.statusRemoveFavorite = 'loading'},
+    [removeFavorite.fulfilled]: (state) => {state.statusRemoveFavorite = 'success'},
+    [removeFavorite.rejected]: (state) => {state.statusRemoveFavorite = 'failed'},
+    [deleteProduct.pending]: (state) => {state.statusRemoveProduct = 'loading'},
+    [deleteProduct.fulfilled]: (state) => {state.statusRemoveProduct = 'success'},
+    [deleteProduct.rejected]: (state) => {state.statusRemoveProduct = 'failed'},
+    [deleteCategory.pending]: (state) => {state.statusRemoveCategory = 'loading'},
+    [deleteCategory.fulfilled]: (state) => {state.statusRemoveCategory = 'success'},
+    [deleteCategory.rejected]: (state) => {state.statusRemoveCategory = 'failed'}
   },
   reducers: {
     _setSearchValue: (state, {payload}) => {
       state.searchValue = payload
+    },
+    _hideProduct: (state, {payload}) => {
+      state.list = state.list.map( cat => {
+        cat.products.map( prod => {
+          if(prod.id === payload) {
+            prod.hide = true
+          }
+          return prod
+        })
+        return cat
+      })
+    },
+    _showProduct: (state, {payload}) => {
+      state.list = state.list.map( cat => {
+        cat.products.map( prod => {
+          if(prod.id === payload) {
+            prod.hide = false
+          }
+          return prod
+        })
+        return cat
+      })
+    },
+    _hideCategory: (state, {payload}) => {
+      state.list = state.list.filter( cat => {
+        if(cat.id === payload) {
+          cat.hide = true
+        }
+        return cat
+      })
+    },
+    _showCategory: (state, {payload}) => {
+      state.list = state.list.filter( cat => {
+        if(cat.id === payload) {
+          cat.hide = false
+        }
+        return cat
+      })
     },
     _setFavoriteON: (state, {payload}) => {
       const newFavorites = []
@@ -140,13 +179,23 @@ export const categoriesSlice = createSlice({
 })
 
 export default categoriesSlice.reducer
-const { _setFavoriteON, _setFavoriteOFF, _changeProdOrder, _setSearchValue } = categoriesSlice.actions
+
+const { 
+  _setFavoriteON, 
+  _setFavoriteOFF, 
+  _changeProdOrder, 
+  _setSearchValue, 
+  _hideProduct, 
+  _showProduct,
+  _hideCategory,
+  _showCategory
+} = categoriesSlice.actions
 
 export const searchByValue = (searchValue) => {
   return (dispatch) => {
     const setSearchValue = async () => {
       dispatch(_setSearchValue(searchValue))
-      dispatch(fetchCategories(searchValue)).then(done => !done && dispatch(_setSearchValue('')))
+      dispatch(fetchCategories(searchValue))
     }
 
     return setSearchValue()
@@ -188,4 +237,26 @@ export const changeProdOrder = (categoryId, prodId, direction, currentOrder) => 
 
     return rearrange()
   }
+}
+
+export const removeProduct = (prodId) => {
+  return (dispatch) => {
+    const remove = async () => {
+      dispatch(_hideProduct(prodId))
+      dispatch(deleteProduct(prodId)).then(removed => !removed && dispatch(_showProduct(prodId)))
+    }
+
+    return remove()
+  }  
+}
+
+export const removeCategory = (catId) => {
+  return (dispatch) => {
+    const remove = async () => {
+      dispatch(_hideCategory(catId))
+      dispatch(deleteCategory(catId)).then(removed => !removed && dispatch(_showCategory(catId)))
+    }
+
+    return remove()
+  }  
 }
