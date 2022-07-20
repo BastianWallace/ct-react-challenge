@@ -2,8 +2,8 @@ import React, { useState } from 'react'
 import { addToFavorites, removeFromFavorites, changeProdOrder, removeProduct } from '../store/slices/categories'
 import { useDispatch, useSelector } from 'react-redux'
 import TextTruncate from 'react-text-truncate'
-import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.min.css';
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.min.css'
 
 // SweetAlert2
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
@@ -29,6 +29,7 @@ const ProductCard = (props) => {
   const [ loadingAddToFavorites, setLoadingAddToFavorites ] = useState(false)
   const [ loadingMoveLeft, setLoadingMoveLeft ] = useState(false)
   const [ loadingMoveRight, setLoadingMoveRight ] = useState(false)
+  const [ loadingDelete, setLoadingDelete ] = useState(false)
 
   const dispatch = useDispatch()
 
@@ -62,20 +63,22 @@ const ProductCard = (props) => {
 
   const handleSortLeft = () => {
     setLoadingMoveLeft(true)
-    dispatch(changeProdOrder({categoryId, prodId:id, direction: 'left', currentOrder:orderNumber})).then( res => {
+    const data = {categoryId, prodId:id, direction: 'left', currentOrder:orderNumber}
+    dispatch(changeProdOrder(data)).then( res => {
       setLoadingMoveLeft(false)
     })
   }
 
   const handleSortRight = () => {
     setLoadingMoveRight(true)
-    dispatch(changeProdOrder({categoryId, prodId:id, direction: 'right', currentOrder:orderNumber})).then( res => {
+    const data = {categoryId, prodId:id, direction: 'right', currentOrder:orderNumber}
+    dispatch(changeProdOrder(data)).then( res => {
       setLoadingMoveRight(false)
     })
   }
 
   const handleDelete = () => {
-
+    setLoadingDelete(true)
     Swal.fire({
       title: 'Do you really want to delete the product?',
       text: "You won't be able to revert this!",
@@ -86,7 +89,14 @@ const ProductCard = (props) => {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        dispatch(removeProduct(id))
+        dispatch(removeProduct(id)).then( result => {
+          if(result?.meta?.requestStatus !== 'fulfilled') {
+            toast.error('the product could not be removed!')
+          }
+          setLoadingDelete(false)
+        })
+      } else {
+        setLoadingDelete(false)
       }
     })
   }
@@ -171,10 +181,18 @@ const ProductCard = (props) => {
 
         </div>
 
-        <div className="col-6 text-end">
-          <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleDelete}>
-            <i className="bi-trash3"></i>
-          </button>
+        <div className="col-6 d-flex justify-content-end">
+          {loadingDelete && (
+            <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
+              <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          ) || (
+            <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleDelete}>
+              <i className="bi-trash3"></i>
+            </button>
+          )}
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux'
 import TextTruncate from 'react-text-truncate'
 import { removeCategory } from '../store/slices/categories'
 import ProductCard from './ProductCard'
+import { toast } from 'react-toastify'
 
 // SweetAlert2
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
@@ -10,6 +11,7 @@ import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 const CategoryItem = (props) => {
   const { type, category: {id, name, products, bgColor, textColor, minOrderNumber, maxOrderNumber} } = props
   const [ expanded, setExpanded ] = useState(true)
+  const [ loadingDelete, setLoadingDelete ] = useState(false)
   const dispatch = useDispatch()
 
   const handleDelete = () => {
@@ -23,7 +25,17 @@ const CategoryItem = (props) => {
       confirmButtonText: 'Yes, delete it!'
     }).then((result) => {
       if (result.isConfirmed) {
-        dispatch(removeCategory(id))
+        setLoadingDelete(true)
+        dispatch(removeCategory(id)).then( result => {
+          if(result?.meta?.requestStatus === 'fulfilled') {
+            toast.error('The category was removed!')
+          }else {
+            toast.error('The category could not be removed!')
+          }
+          setLoadingDelete(false)
+        })
+      } else {
+        setLoadingDelete(false)
       }
     })
   }
@@ -40,10 +52,19 @@ const CategoryItem = (props) => {
               text={name}
             />
           </div>
-          <div>
-            <button type="button" className="btn-unstyled fs-5 mx-2" style={{color:`${textColor}`}} onClick={handleDelete}>
-              <i className="bi-trash3"></i>
-            </button>
+          <div className="d-flex">
+            {loadingDelete && (
+              <div className="d-flex justify-content-center ms-3 me-1">
+                <div className="spinner-border text-white" role="status" style={{width: '1.75rem', height: '1.75rem'}}>
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) || (
+              <button type="button" className="btn-unstyled fs-5 mx-2" style={{color:`${textColor}`}} onClick={handleDelete}>
+                <i className="bi-trash3"></i>
+              </button>
+            )}
+
             <button 
               type="button" 
               className="btn-unstyled fs-5 px-2" 
