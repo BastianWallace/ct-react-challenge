@@ -90,9 +90,12 @@ const ProductCard = (props) => {
     }).then((result) => {
       if (result.isConfirmed) {
         dispatch(removeProduct(id)).then( result => {
-          if(result?.meta?.requestStatus !== 'fulfilled') {
+          if(result?.meta?.requestStatus === 'fulfilled') {
+            toast.success('the product was removed!')
+          } else {
             toast.error('the product could not be removed!')
           }
+          
           setLoadingDelete(false)
         })
       } else {
