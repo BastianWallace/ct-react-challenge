@@ -24,28 +24,54 @@ const ProductCard = (props) => {
     type
   } = props
 
-  //console.log(props.product)
-
   const { list: favorites } = useSelector(state => state.favorites)
   const [ imageLoaded, setImageLoaded ] = useState(false)
+  const [ loadingAddToFavorites, setLoadingAddToFavorites ] = useState(false)
+  const [ loadingMoveLeft, setLoadingMoveLeft ] = useState(false)
+  const [ loadingMoveRight, setLoadingMoveRight ] = useState(false)
+
   const dispatch = useDispatch()
 
-  const handleAddToFavorite = () => {
-    dispatch(addToFavorites(id))
-    toast.success('New favorite was added!')
+  const handleAddToFavorite = async () => {
+    setLoadingAddToFavorites(true)
+    
+    dispatch(addToFavorites(id)).then( res => {
+      if(res?.meta?.requestStatus === 'fulfilled') {
+        toast.success('New favorite was added!')
+      } else {
+        toast.error(`Could not add it to favorites!`)
+      }
+
+      setLoadingAddToFavorites(false)
+    })
   }
 
   const handleRemoveFromFavorite = () => {
-    dispatch(removeFromFavorites(id))
-    toast.success('the product was removed from favorites!')
+    setLoadingAddToFavorites(true)
+
+    dispatch(removeFromFavorites(id)).then( res => {
+      if(res?.meta?.requestStatus === 'fulfilled') {
+        toast.success('the product was removed from favorites!')
+      } else {
+        toast.error(`Could not remove it from favorites!`)
+      }
+
+      setLoadingAddToFavorites(false)
+    })
   }
 
   const handleSortLeft = () => {
-    dispatch(changeProdOrder(categoryId, id, 'left', orderNumber))
+    setLoadingMoveLeft(true)
+    dispatch(changeProdOrder({categoryId, prodId:id, direction: 'left', currentOrder:orderNumber})).then( res => {
+      setLoadingMoveLeft(false)
+    })
   }
 
   const handleSortRight = () => {
-    dispatch(changeProdOrder(categoryId, id, 'right', orderNumber))
+    setLoadingMoveRight(true)
+    dispatch(changeProdOrder({categoryId, prodId:id, direction: 'right', currentOrder:orderNumber})).then( res => {
+      setLoadingMoveRight(false)
+    })
   }
 
   const handleDelete = () => {
@@ -84,22 +110,30 @@ const ProductCard = (props) => {
       </div>
 
       <div className="card-fav-button">
-        {!favorite && !favorites.includes(id) && (
-          <button type="button" className="btn-unstyled fs-4" onClick={handleAddToFavorite} title="Add to Favorites">
-            <i className="bi-heart-fill text-white prod-fav-icon-bg"></i>
-            <i className="bi-heart prod-fav-icon-body"></i>
-          </button>
+        {loadingAddToFavorites && (
+          <div className="d-flex justify-content-center mt-1">
+            <div className="spinner-border text-secondary" role="status" style={{width: '1.5rem', height: '1.5rem'}}>
+              <span className="visually-hidden">Loading...</span>
+            </div>
+          </div>
         ) || (
-          <button type="button" className="btn-unstyled fs-4" onClick={handleRemoveFromFavorite} title="Remove from Favorites">
-            <i className="bi-heart-fill text-primary"></i>
-          </button>
+          !favorite && !favorites.includes(id) && (
+            <button type="button" className="btn-unstyled fs-4" onClick={handleAddToFavorite} title="Add to Favorites">
+              <i className="bi-heart-fill text-white prod-fav-icon-bg"></i>
+              <i className="bi-heart prod-fav-icon-body"></i>
+            </button>
+          ) || (
+            <button type="button" className="btn-unstyled fs-4" onClick={handleRemoveFromFavorite} title="Remove from Favorites">
+              <i className="bi-heart-fill text-primary"></i>
+            </button>
+          )
         )}
       </div>
       
       <h5 className="text-center mt-4 mb-3 product-card-name">
         <TextTruncate
           line={3}
-          element="span"
+          element="div"
           truncateText="…"
           text={name}
         />
@@ -108,15 +142,31 @@ const ProductCard = (props) => {
       <div className="d-flex">
         <div className="col-6 d-flex">
           {orderNumber > 1 && orderNumber > minOrderNumber && (
-            <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleSortLeft}>
-              <i className="bi-arrow-left"></i>
-            </button>
+            loadingMoveLeft && (
+              <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
+                <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) || (
+              <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleSortLeft}>
+                <i className="bi-arrow-left"></i>
+              </button>
+            )
           )}
 
           {orderNumber < maxOrderNumber && (
-            <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleSortRight}>
-              <i className="bi-arrow-right"></i>
-            </button>
+            loadingMoveRight && (
+              <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
+                <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            ) || (
+              <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleSortRight}>
+                <i className="bi-arrow-right"></i>
+              </button>
+            )
           )}
 
         </div>

@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { Routes, Route } from 'react-router-dom'
+//import { Routes, Route } from 'react-router-dom'
 //import { useAuth } from './firebase/config'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.min.css';
@@ -30,8 +30,6 @@ function App() {
     dispatch(getFavorites())
     dispatch(fetchCategories())
   }, [dispatch])
-
-  console.log('App rendered!')
 
   return (
     <div className="App">
