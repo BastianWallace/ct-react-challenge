@@ -84,11 +84,6 @@ class DbCategories {
   }
 
   getCategories = async (searchValue = null) => {
-    // await new Promise(resolve => {
-    //   setTimeout(() => {
-    //     resolve('resolved')
-    //   }, 5000);
-    // })
     const searchValueLower = searchValue ? searchValue.toLowerCase() : null
     const categoriesPromise = new Promise((resolve, reject) => {
       let q = query(this.categoriesCollectionRef, orderBy('name'))
@@ -212,31 +207,41 @@ class DbCategories {
 
   deleteProduct = async (prodId, rejectWithValue) => {
     try {
-      const q = query(this.productsCollectionRef, where("__name__", "==", prodId), limit(1))
-      const querySnapshot = await getDocs(q)
+      const batch = writeBatch(firebaseDB)
+      const queryProduct = query(this.productsCollectionRef, where("__name__", "==", prodId), limit(1))
+      const queryProductSnapshot = await getDocs(queryProduct)
 
-      if(querySnapshot.size === 1) {
-        const document = querySnapshot.docs[0]
-        const docRef = doc(firebaseDB, "products", prodId)
+      if(queryProductSnapshot.size === 1) {
+        const queryFavorites = query(this.favoritesCollectionRef, where("productId", "==", prodId))
+        const queryFavoritesSnapshot = await getDocs(queryFavorites)
+        
+        const document = queryProductSnapshot.docs[0]
         const imageName = document.data().image
         const imageRef = ref(storage, `products/${imageName}`)
 
-        deleteObject(imageRef).then(() => {
-          // File deleted successfully, proceed to delete the document
-          deleteDoc(docRef).then(() => {
-            // Entire Document has been deleted successfully
-            return true
-          
-          }).catch(error => {
-            return rejectWithValue('CANT_DELETE_PRODUCT')
-          })
+        await deleteObject(imageRef).then(() => {
 
-        }).catch((error) => {
+          for ( const favDocument of queryFavoritesSnapshot.docs ) {
+            // Add the favorite into the batch to be deleted
+            batch.delete(favDocument.ref)
+          }
+
+          batch.delete(document.ref)
+
+        }).catch((err) => {
           return rejectWithValue('CANT_DELETE_IMAGE')
         })
+
+        try {
+          await batch.commit()
+          return true
+        
+        } catch (err) {
+          return rejectWithValue('CANT_DELETE_PRODUCT')
+        }
       }
     
-    } catch (e) {
+    } catch (err) {
       // Transaction failed
       return rejectWithValue('CANT_DELETE_PRODUCT')
     }
@@ -255,7 +260,10 @@ class DbCategories {
       const queryProducts = query(this.productsCollectionRef, where("categoryId", "==", catId))
       const queryProductsSnapshot = await getDocs(queryProducts)
 
+      const productIdList = []
+
       for ( const document of queryProductsSnapshot.docs ) {
+        productIdList.push(document.id)
         const imageName = document.data().image
         const imageRef = ref(storage, `products/${imageName}`)
 
@@ -267,6 +275,15 @@ class DbCategories {
         }).catch((error) => {
           return rejectWithValue('CANT_DELETE_IMAGE')
         })
+      }
+
+      // Get all favorites where productId is in the list productIdList
+      const queryFavorites = query(this.favoritesCollectionRef, where('productId', 'in', productIdList))
+      const queryFavoritesSnapshot = await getDocs(queryFavorites)
+
+      for ( const document of queryFavoritesSnapshot.docs ) {
+        // Add the favorite into the batch to be deleted
+        batch.delete(document.ref)
       }
 
       // add the category into the batch to be deleted

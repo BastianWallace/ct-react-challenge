@@ -28,7 +28,7 @@ const CategoryItem = (props) => {
         setLoadingDelete(true)
         dispatch(removeCategory(id)).then( result => {
           if(result?.meta?.requestStatus === 'fulfilled') {
-            toast.error('The category was removed!')
+            toast.success('The category was removed!')
           }else {
             toast.error('The category could not be removed!')
           }
@@ -55,7 +55,7 @@ const CategoryItem = (props) => {
           <div className="d-flex">
             {loadingDelete && (
               <div className="d-flex justify-content-center ms-3 me-1">
-                <div className="spinner-border text-white" role="status" style={{width: '1.75rem', height: '1.75rem'}}>
+                <div className="spinner-border" role="status" style={{color:`${textColor}`, width: '1.75rem', height: '1.75rem'}}>
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
