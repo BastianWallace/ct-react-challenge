@@ -2,7 +2,6 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import DbCategories from '../../firebase/collections/dbCategories'
 import DbFavorites from '../../firebase/collections/dbFavorites'
 
-
 const _newCategory = createAsyncThunk(
   'categories/newCategory', async (data, { rejectWithValue }) => {
     return await DbCategories.newCategory(data, rejectWithValue)
@@ -22,8 +21,8 @@ export const fetchCategories = createAsyncThunk(
 )
 
 const _saveNewOrder = createAsyncThunk(
-  'categories/_saveNewOrder', async ({categoryId, prodId, direction, currentOrder}) => {
-    return await DbCategories.saveNewOrder(categoryId, prodId, direction, currentOrder)
+  'categories/_saveNewOrder', async (data) => {
+    return await DbCategories.saveNewOrder(data)
   }
 )
 
@@ -40,8 +39,8 @@ const _deleteCategory = createAsyncThunk(
 )
 
 const _saveFavorite = createAsyncThunk(
-  'categories/_saveFavorite', async (prodId) => {
-    return await DbFavorites.saveFavorite(prodId)
+  'categories/_saveFavorite', async (prodId, { rejectWithValue }) => {
+    return await DbFavorites.saveFavorite(prodId, rejectWithValue)
   }
 )
 
@@ -60,50 +59,6 @@ export const categoriesSlice = createSlice({
     favorites: [],
     searchValue: ''
   },
-  extraReducers: {
-    [_newCategory.pending]: (state) => {state.statusNewCategory = 'loading'},
-    [_newCategory.fulfilled]: (state) => {state.statusNewCategory = 'success'},
-    [_newCategory.rejected]: (state) => {state.statusNewCategory = 'failed'},
-    [_newProduct.pending]: (state) => {state.statusNewProduct = 'loading'},
-    [_newProduct.fulfilled]: (state) => {state.statusNewProduct = 'success'},
-    [_newProduct.rejected]: (state) => {state.statusNewProduct = 'failed'},
-    [fetchCategories.pending]: (state) => {
-      state.status = 'loading'
-      state.loadingCategories = true
-    },
-    [fetchCategories.fulfilled]: (state, {payload}) => {
-      state.status = 'success'
-      state.loadingCategories = false
-      state.list = payload
-      let favorites = []
-
-      payload.forEach(category => {
-        category.products.forEach(product => {
-          if(product.favorite) {
-            favorites.push(product)
-          }
-        })
-      })
-
-      state.favorites = favorites
-    },
-    [fetchCategories.rejected]: (state) => {
-      state.status = 'failed'
-      state.loadingCategories = false
-    },
-    [_saveFavorite.pending]: (state) => {state.statusSaveFavorite = 'loading'},
-    [_saveFavorite.fulfilled]: (state) => {state.statusSaveFavorite = 'success'},
-    [_saveFavorite.rejected]: (state) => {state.statusSaveFavorite = 'failed'},
-    [_removeFavorite.pending]: (state) => {state.statusRemoveFavorite = 'loading'},
-    [_removeFavorite.fulfilled]: (state) => {state.statusRemoveFavorite = 'success'},
-    [_removeFavorite.rejected]: (state) => {state.statusRemoveFavorite = 'failed'},
-    [_deleteProduct.pending]: (state) => {state.statusRemoveProduct = 'loading'},
-    [_deleteProduct.fulfilled]: (state) => {state.statusRemoveProduct = 'success'},
-    [_deleteProduct.rejected]: (state) => {state.statusRemoveProduct = 'failed'},
-    [_deleteCategory.pending]: (state) => {state.statusRemoveCategory = 'loading'},
-    [_deleteCategory.fulfilled]: (state) => {state.statusRemoveCategory = 'success'},
-    [_deleteCategory.rejected]: (state) => {state.statusRemoveCategory = 'failed'}
-  },
   reducers: {
     _setSearchValue: (state, {payload}) => {
       state.searchValue = payload
@@ -119,29 +74,10 @@ export const categoriesSlice = createSlice({
         return cat
       })
     },
-    _showProduct: (state, {payload}) => {
-      state.list = state.list.map( cat => {
-        cat.products.map( prod => {
-          if(prod.id === payload) {
-            prod.hide = false
-          }
-          return prod
-        })
-        return cat
-      })
-    },
     _hideCategory: (state, {payload}) => {
       state.list = state.list.filter( cat => {
         if(cat.id === payload) {
           cat.hide = true
-        }
-        return cat
-      })
-    },
-    _showCategory: (state, {payload}) => {
-      state.list = state.list.filter( cat => {
-        if(cat.id === payload) {
-          cat.hide = false
         }
         return cat
       })
@@ -195,6 +131,50 @@ export const categoriesSlice = createSlice({
         return category
       })
     }
+  },
+  extraReducers: {
+    [_newCategory.pending]: (state) => {state.statusNewCategory = 'loading'},
+    [_newCategory.fulfilled]: (state) => {state.statusNewCategory = 'success'},
+    [_newCategory.rejected]: (state) => {state.statusNewCategory = 'failed'},
+    [_newProduct.pending]: (state) => {state.statusNewProduct = 'loading'},
+    [_newProduct.fulfilled]: (state) => {state.statusNewProduct = 'success'},
+    [_newProduct.rejected]: (state) => {state.statusNewProduct = 'failed'},
+    [fetchCategories.pending]: (state) => {
+      state.status = 'loading'
+      state.loadingCategories = true
+    },
+    [fetchCategories.fulfilled]: (state, {payload}) => {
+      state.status = 'success'
+      state.loadingCategories = false
+      state.list = payload
+      let favorites = []
+
+      payload.forEach(category => {
+        category.products.forEach(product => {
+          if(product.favorite) {
+            favorites.push(product)
+          }
+        })
+      })
+
+      state.favorites = favorites
+    },
+    [fetchCategories.rejected]: (state) => {
+      state.status = 'failed'
+      state.loadingCategories = false
+    },
+    [_saveFavorite.pending]: (state) => {state.statusSaveFavorite = 'loading'},
+    [_saveFavorite.fulfilled]: (state) => {state.statusSaveFavorite = 'success'},
+    [_saveFavorite.rejected]: (state) => {state.statusSaveFavorite = 'failed'},
+    [_removeFavorite.pending]: (state) => {state.statusRemoveFavorite = 'loading'},
+    [_removeFavorite.fulfilled]: (state) => {state.statusRemoveFavorite = 'success'},
+    [_removeFavorite.rejected]: (state) => {state.statusRemoveFavorite = 'failed'},
+    [_deleteProduct.pending]: (state) => {state.statusRemoveProduct = 'loading'},
+    [_deleteProduct.fulfilled]: (state) => {state.statusRemoveProduct = 'success'},
+    [_deleteProduct.rejected]: (state) => {state.statusRemoveProduct = 'failed'},
+    [_deleteCategory.pending]: (state) => {state.statusRemoveCategory = 'loading'},
+    [_deleteCategory.fulfilled]: (state) => {state.statusRemoveCategory = 'success'},
+    [_deleteCategory.rejected]: (state) => {state.statusRemoveCategory = 'failed'}
   }
 })
 
@@ -205,88 +185,77 @@ const {
   _setFavoriteOFF, 
   _changeProdOrder, 
   _setSearchValue, 
-  _hideProduct, 
-  _showProduct,
-  _hideCategory,
-  _showCategory
+  _hideProduct,
+  _hideCategory
 } = categoriesSlice.actions
 
 export const createCategory = (data) => async (dispatch) => {
-  await dispatch(_newCategory(data))
-  return await dispatch(fetchCategories())
+  return dispatch(_newCategory(data)).then( async (result) => {
+    if(result.meta.requestStatus === 'fulfilled') {
+      await dispatch(fetchCategories())
+    }
+    return result
+  })
 }
 
 export const createProduct = (data) => async (dispatch) => {
-  await dispatch(_newProduct(data))
-  return await dispatch(fetchCategories())
-}
-
-export const searchByValue = (searchValue) => {
-  return (dispatch) => {
-    const setSearchValue = async () => {
-      dispatch(_setSearchValue(searchValue))
-      dispatch(fetchCategories(searchValue))
+  return dispatch(_newProduct(data)).then( async (result) => {
+    if(result?.meta?.requestStatus === 'fulfilled') {
+      await dispatch(fetchCategories())
     }
-
-    return setSearchValue()
-  }
+    return result
+  })
 }
 
-export const addToFavorites = (prodId) => {
-  return (dispatch) => {
-    const add = async () => {
+export const searchByValue = (data) => async (dispatch) => {
+  const setSearchValue = async () => {
+    dispatch(_setSearchValue(data))
+    dispatch(fetchCategories(data))
+  }
+  return setSearchValue()
+}
+
+export const addToFavorites = (prodId) => async (dispatch) => {
+  return dispatch(_saveFavorite(prodId)).then( async (result) => {
+    if(result?.meta?.requestStatus === 'fulfilled') {
       dispatch(_setFavoriteON(prodId))
-      dispatch(_saveFavorite(prodId)).then(saved => !saved && dispatch(_setFavoriteOFF(prodId)))
     }
-
-    return add()
-  }  
+    return result
+  })
 }
 
-export const removeFromFavorites = (prodId) => {
-  return (dispatch) => {
-    const remove = async () => {
+export const removeFromFavorites = (prodId) => async (dispatch) => {
+  return await dispatch(_removeFavorite(prodId)).then( async (result) => {
+    if(result?.meta?.requestStatus === 'fulfilled') {
       dispatch(_setFavoriteOFF(prodId))
-      dispatch(_removeFavorite(prodId)).then(removed => !removed && dispatch(_setFavoriteON(prodId)))
     }
-
-    return remove()
-  }  
+    return result
+  })
 }
 
-export const changeProdOrder = (categoryId, prodId, direction, currentOrder) => {
-  return (dispatch) => {
-    const rearrange = async () => {
-      dispatch(_changeProdOrder({categoryId, prodId, direction, currentOrder}))
-      dispatch(_saveNewOrder({categoryId, prodId, direction, currentOrder})).then(
-        changed => !changed && dispatch(
-          _changeProdOrder({categoryId, prodId, direction: direction === 'left' ? 'right' : 'left', currentOrder}
-        )
-      ))
+export const changeProdOrder = (data) => async (dispatch) => {
+  return dispatch(_saveNewOrder(data)).then( async (result) => {
+    if(result?.meta?.requestStatus === 'fulfilled') {
+      dispatch(_changeProdOrder(data))
     }
-
-    return rearrange()
-  }
+    return result
+  })
 }
 
-export const removeProduct = (prodId) => {
-  return (dispatch) => {
-    const remove = async () => {
-      dispatch(_hideProduct(prodId))
-      dispatch(_deleteProduct(prodId)).then(removed => !removed && dispatch(_showProduct(prodId)))
+export const removeProduct = (data) => async (dispatch) => {
+  return dispatch(_deleteProduct(data)).then( async (result) => {
+    if(result?.meta?.requestStatus === 'fulfilled') {
+      dispatch(_hideProduct(data))
     }
-
-    return remove()
-  }  
+    return result
+  })
 }
 
-export const removeCategory = (catId) => {
-  return (dispatch) => {
-    const remove = async () => {
-      dispatch(_hideCategory(catId))
-      dispatch(_deleteCategory(catId)).then(removed => !removed && dispatch(_showCategory(catId)))
+export const removeCategory = (data) => async (dispatch) => {
+  return dispatch(_deleteCategory(data)).then( async (result) => {
+    if(result?.meta?.requestStatus === 'fulfilled') {
+      dispatch(_hideCategory(data))
     }
-
-    return remove()
-  }  
+    return result
+  })
 }

@@ -73,11 +73,11 @@ const CreateItems = () => {
       bgColor: bgColor,
       textColor: textColor
     
-    })).then(res => {
+    })).then( res => {
       setCategorySubmitEnabled(true)
       setDisplayCategoryLoading(false)
 
-      if( res.meta?.requestStatus === 'fulfilled') {
+      if( res?.meta?.requestStatus === 'fulfilled') {
 
         Swal.fire({
           title: 'Success!',
@@ -96,7 +96,7 @@ const CreateItems = () => {
 
         Swal.fire({
           title: 'Failed!',
-          html: `Error, ${errorMessages[res.payload] ? errorMessages[res.payload] : errorMessages['DEFAULT']}`,
+          html: `Error, ${errorMessages[res?.payload] ? errorMessages[res?.payload] : errorMessages['DEFAULT']}`,
           icon: 'error',
           confirmButtonText: 'Shoot!'
         })

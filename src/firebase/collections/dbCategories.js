@@ -84,6 +84,11 @@ class DbCategories {
   }
 
   getCategories = async (searchValue = null) => {
+    // await new Promise(resolve => {
+    //   setTimeout(() => {
+    //     resolve('resolved')
+    //   }, 5000);
+    // })
     const searchValueLower = searchValue ? searchValue.toLowerCase() : null
     const categoriesPromise = new Promise((resolve, reject) => {
       let q = query(this.categoriesCollectionRef, orderBy('name'))
@@ -172,7 +177,8 @@ class DbCategories {
     return this.getCategories(searchValue)
   }
 
-  saveNewOrder = async (categoryId, prodId, direction, currentOrder) => {
+  saveNewOrder = async (data) => {
+    const {categoryId, prodId, direction, currentOrder} = data
     const q = query(this.productsCollectionRef, where("categoryId", "==", categoryId), orderBy('orderNumber'))
     const querySnapshot = await getDocs(q)
 
@@ -184,6 +190,7 @@ class DbCategories {
       querySnapshot.forEach( doc => {
         // doc.data() is never undefined for query doc snapshots
         const prod = {...doc.data(), id: doc.id}
+        
         if(prod.id === prodId) {
           batch.update(doc.ref, {"orderNumber": newOrderNumber});
         

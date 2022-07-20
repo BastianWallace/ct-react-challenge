@@ -1,4 +1,4 @@
-import { collection, getDocs, addDoc, query, where, writeBatch, serverTimestamp, Timestamp } from '@firebase/firestore'
+import { collection, getDocs, addDoc, query, where, writeBatch, serverTimestamp } from '@firebase/firestore'
 import { firebaseDB } from '../config'
 
 class DbFavorites {
@@ -19,18 +19,26 @@ class DbFavorites {
     } catch (e) {
       console.log(e)
     }
-
   }
 
-  //,createdDate: Timestamp.toDate(doc.data.createdDate)
+  saveFavorite = async (prodId, rejectWithValue) => {
+    // await new Promise(resolve => {
+    //   setTimeout(() => {
+    //     resolve('resolved')
+    //   }, 2000);
+    // })
 
-  saveFavorite = async (prodId) => {
-    const docId = await addDoc(this.favoritesCollectionRef, {
-      productId: prodId,
-      createdDate: serverTimestamp()
-    })
+    try{
+      const docId = await addDoc(this.favoritesCollectionRef, {
+        productId: prodId,
+        createdDate: serverTimestamp()
+      })
 
-    return docId ? prodId : null
+      return docId ? prodId : rejectWithValue("UNKNOWN_ERROR")
+    
+    } catch (err) {
+      return rejectWithValue("UNKNOWN_ERROR")
+    }
   }
 
   deleteFavorite = async (prodId) => {

@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux'
+import TextTruncate from 'react-text-truncate'
 import { removeCategory } from '../store/slices/categories'
 import ProductCard from './ProductCard'
 
@@ -31,7 +32,14 @@ const CategoryItem = (props) => {
     <div className="accordion-item mb-3">
       <div className="accordion-header" id={`panelsStayOpen-heading-${id}`}>
         <div className="d-flex px-3 py-2 justify-content-between align-items-center" style={{backgroundColor:`${bgColor}`}}>
-          <div className="fs-5" style={{color:`${textColor}`}}>{name}</div>
+          <div className="col-6 fs-5" style={{color:`${textColor}`}}>
+            <TextTruncate
+              line={1}
+              element="div"
+              truncateText="…"
+              text={name}
+            />
+          </div>
           <div>
             <button type="button" className="btn-unstyled fs-5 mx-2" style={{color:`${textColor}`}} onClick={handleDelete}>
               <i className="bi-trash3"></i>
