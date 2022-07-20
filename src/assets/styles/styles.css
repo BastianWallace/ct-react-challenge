@@ -1,5 +1,9 @@
 
 /* FONT SIZES */
+.fs-xs {
+  font-size: 0.75rem;
+}
+
 .fs-s {
   font-size: 1rem;
 }

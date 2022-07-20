@@ -6,21 +6,25 @@ import { BrowserRouter } from 'react-router-dom'
 
 // Redux
 import { Provider } from 'react-redux'
-import store from './store'
+//import store from './store'
+import { setupStore } from './store'
 
 // Bootstrap
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap-icons/font/bootstrap-icons.css'
 import 'bootstrap/dist/js/bootstrap.min.js'
 
-// SweetAlert2
+// SweetAlert2 styles
 import 'sweetalert2/dist/sweetalert2.min.css'
+
+// ReactToastify styles
+import 'react-toastify/dist/ReactToastify.min.css'
 
 // Custom Styles
 import './assets/styles/styles.css'
 
 const root = ReactDOM.createRoot(document.getElementById('root'))
-root.render(<Provider store={store}><BrowserRouter><App /></BrowserRouter></Provider>)
+root.render(<Provider store={setupStore({})}><BrowserRouter><App /></BrowserRouter></Provider>)
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

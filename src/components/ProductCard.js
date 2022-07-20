@@ -3,9 +3,7 @@ import { addToFavorites, removeFromFavorites, changeProdOrder, removeProduct } f
 import { useDispatch, useSelector } from 'react-redux'
 import TextTruncate from 'react-text-truncate'
 import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.min.css'
-
-// SweetAlert2
+//import 'react-toastify/dist/ReactToastify.min.css'
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const ProductCard = (props) => {
@@ -148,10 +146,14 @@ const ProductCard = (props) => {
           text={name}
         />
       </h5>
+
+      {type === 'favorites' && addedToFavoritesOn && (
+        <div className="text-center text-secondary mb-3 fs-xs">Added on {addedToFavoritesOn}</div>
+      )}
       
       <div className="d-flex">
         <div className="col-6 d-flex">
-          {orderNumber > 1 && orderNumber > minOrderNumber && (
+          {type !== 'favorites' && orderNumber > 1 && orderNumber > minOrderNumber && (
             loadingMoveLeft && (
               <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
                 <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
@@ -164,8 +166,8 @@ const ProductCard = (props) => {
               </button>
             )
           )}
-
-          {orderNumber < maxOrderNumber && (
+            
+          {type !== 'favorites' && orderNumber < maxOrderNumber && (
             loadingMoveRight && (
               <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
                 <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
@@ -195,10 +197,6 @@ const ProductCard = (props) => {
           )}
         </div>
       </div>
-
-      {type === 'favorites' && addedToFavoritesOn && (
-        <div className="text-center text-secondary mt-3">Added on {addedToFavoritesOn}</div>
-      )}
       
     </div>
   )
