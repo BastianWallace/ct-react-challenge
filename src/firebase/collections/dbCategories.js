@@ -1,5 +1,5 @@
-import { collection, addDoc, getDocs, query, where, orderBy, limit, writeBatch } from '@firebase/firestore'
-import { ref, uploadBytes } from 'firebase/storage'
+import { collection, doc, addDoc, getDocs, query, where, orderBy, limit, writeBatch, deleteDoc } from '@firebase/firestore'
+import { ref, uploadBytes, deleteObject } from 'firebase/storage'
 import { firebaseDB } from '../config'
 import { storage } from '../config'
 import { v4 } from 'uuid'
@@ -75,7 +75,7 @@ class DbCategories {
         })
       
       } catch (e) {
-        console.log(e)
+        return rejectWithValue("CREATE_ERROR")
       }
 
     } else {
@@ -94,9 +94,9 @@ class DbCategories {
       let q = query(this.categoriesCollectionRef, orderBy('name'))
 
       getDocs(q).then( result => {
-        const categories = result.docs.map( doc => ({
-          ...doc.data(),
-          id: doc.id
+        const categories = result.docs.map( document => ({
+          ...document.data(),
+          id: document.id
         }))
 
         resolve(categories)
@@ -110,9 +110,9 @@ class DbCategories {
     const productosPromise = new Promise((resolve, reject) => {
       const q = query(this.productsCollectionRef, orderBy('orderNumber'))
       getDocs(q).then( result => {
-        const productos = result.docs.map( doc => ({
-          ...doc.data(),
-          id: doc.id
+        const productos = result.docs.map( document => ({
+          ...document.data(),
+          id: document.id
         }))
 
         resolve(productos)
@@ -125,7 +125,7 @@ class DbCategories {
 
     const favoritesPromise = new Promise((resolve, reject) => {
       getDocs(this.favoritesCollectionRef).then( result => {
-        const favorites = result.docs.map( doc => doc.data().productId)
+        const favorites = result.docs.map( document => document.data().productId)
         resolve(favorites)
       
       }).catch( err => {
@@ -187,15 +187,14 @@ class DbCategories {
       const batch = writeBatch(firebaseDB)
       const newOrderNumber = direction === 'left' ? currentOrder - 1 : currentOrder + 1
 
-      querySnapshot.forEach( doc => {
-        // doc.data() is never undefined for query doc snapshots
-        const prod = {...doc.data(), id: doc.id}
+      querySnapshot.forEach( document => {
+        const prod = {...document.data(), id:  document.id}
         
         if(prod.id === prodId) {
-          batch.update(doc.ref, {"orderNumber": newOrderNumber});
+          batch.update(document.ref, {"orderNumber": newOrderNumber});
         
         } else if(prod.orderNumber === newOrderNumber) {
-          batch.update(doc.ref, {"orderNumber": currentOrder});
+          batch.update(document.ref, {"orderNumber": currentOrder});
         }
       })
 
@@ -211,32 +210,39 @@ class DbCategories {
     }
   }
 
-  deleteProduct = async (prodId) => {
+  deleteProduct = async (prodId, rejectWithValue) => {
     try {
-      // Get a new write batch
-      const batch = writeBatch(firebaseDB)
-
-      const q = query(this.productsCollectionRef, where("__name__", "==", prodId))
+      const q = query(this.productsCollectionRef, where("__name__", "==", prodId), limit(1))
       const querySnapshot = await getDocs(q)
 
-      querySnapshot.forEach( doc => {
-        // doc.data() is never undefined for query doc snapshots
-        batch.delete(doc.ref)
-      })
+      if(querySnapshot.size === 1) {
+        const document = querySnapshot.docs[0]
+        const docRef = doc(firebaseDB, "products", prodId)
+        const imageName = document.data().image
+        const imageRef = ref(storage, `products/${imageName}`)
 
-      // Commit the batch
-      await batch.commit()
+        deleteObject(imageRef).then(() => {
+          // File deleted successfully, proceed to delete the document
+          deleteDoc(docRef).then(() => {
+            // Entire Document has been deleted successfully
+            return true
+          
+          }).catch(error => {
+            return rejectWithValue('CANT_DELETE_PRODUCT')
+          })
 
-      // Transaction successfully committed!
-      return true
+        }).catch((error) => {
+          return rejectWithValue('CANT_DELETE_IMAGE')
+        })
+      }
     
     } catch (e) {
       // Transaction failed
-      return false
+      return rejectWithValue('CANT_DELETE_PRODUCT')
     }
   }
 
-  deleteCategory = async (catId) => {
+  deleteCategory = async (catId, rejectWithValue) => {
     try {
       // Get a new write batch
       const batch = writeBatch(firebaseDB)
@@ -249,25 +255,37 @@ class DbCategories {
       const queryProducts = query(this.productsCollectionRef, where("categoryId", "==", catId))
       const queryProductsSnapshot = await getDocs(queryProducts)
 
-      queryProductsSnapshot.forEach( doc => {
-        // doc.data() is never undefined for query doc snapshots
-        batch.delete(doc.ref)
-      })
+      for ( const document of queryProductsSnapshot.docs ) {
+        const imageName = document.data().image
+        const imageRef = ref(storage, `products/${imageName}`)
 
-      queryCategorySnapshot.forEach( doc => {
-        // doc.data() is never undefined for query doc snapshots
-        batch.delete(doc.ref)
-      })
+        // wait for image delete process to continue with product document
+        await deleteObject(imageRef).then(() => {
+          // File deleted successfully, proceed to add the product into the batch to be deleted
+          batch.delete(document.ref)
+
+        }).catch((error) => {
+          return rejectWithValue('CANT_DELETE_IMAGE')
+        })
+      }
+
+      // add the category into the batch to be deleted
+      for ( const document of queryCategorySnapshot.docs ) {
+        batch.delete(document.ref)
+      }
 
       // Commit the batch
-      await batch.commit()
-
-      // Transaction successfully committed!
-      return true
+      try {
+        await batch.commit()
+        return true
+      
+      } catch (err) {
+        return rejectWithValue('CANT_DELETE_DATA')
+      }
     
     } catch (e) {
       // Transaction failed
-      return false
+      return rejectWithValue('CANT_DELETE_DATA')
     }
   }
 }

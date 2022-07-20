@@ -27,14 +27,14 @@ const _saveNewOrder = createAsyncThunk(
 )
 
 const _deleteProduct = createAsyncThunk(
-  'categories/_deleteProduct', async (prodId) => {
-    return await DbCategories.deleteProduct(prodId)
+  'categories/_deleteProduct', async (prodId, { rejectWithValue }) => {
+    return await DbCategories.deleteProduct(prodId, rejectWithValue)
   }
 )
 
 const _deleteCategory = createAsyncThunk(
-  'categories/_deleteCategory', async (catId) => {
-    return await DbCategories.deleteCategory(catId)
+  'categories/_deleteCategory', async (catId, { rejectWithValue }) => {
+    return await DbCategories.deleteCategory(catId, rejectWithValue)
   }
 )
 
