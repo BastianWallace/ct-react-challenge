@@ -1,4 +1,4 @@
-import { collection, doc, addDoc, getDocs, query, where, orderBy, limit, writeBatch, deleteDoc } from '@firebase/firestore'
+import { collection, addDoc, getDocs, query, where, orderBy, limit, writeBatch } from '@firebase/firestore'
 import { ref, uploadBytes, deleteObject } from 'firebase/storage'
 import { firebaseDB } from '../config'
 import { storage } from '../config'
@@ -168,10 +168,6 @@ class DbCategories {
     return result
   }
 
-  getDataBasedOnSearch = async (searchValue) => {
-    return this.getCategories(searchValue)
-  }
-
   saveNewOrder = async (data) => {
     const {categoryId, prodId, direction, currentOrder} = data
     const q = query(this.productsCollectionRef, where("categoryId", "==", categoryId), orderBy('orderNumber'))
@@ -272,18 +268,20 @@ class DbCategories {
           // File deleted successfully, proceed to add the product into the batch to be deleted
           batch.delete(document.ref)
 
-        }).catch((error) => {
+        }).catch((err) => {
           return rejectWithValue('CANT_DELETE_IMAGE')
         })
       }
 
-      // Get all favorites where productId is in the list productIdList
-      const queryFavorites = query(this.favoritesCollectionRef, where('productId', 'in', productIdList))
-      const queryFavoritesSnapshot = await getDocs(queryFavorites)
+      if(queryProductsSnapshot.docs.length > 0) {
+        // Get all favorites where productId is in the list productIdList
+        const queryFavorites = query(this.favoritesCollectionRef, where('productId', 'in', productIdList))
+        const queryFavoritesSnapshot = await getDocs(queryFavorites)
 
-      for ( const document of queryFavoritesSnapshot.docs ) {
-        // Add the favorite into the batch to be deleted
-        batch.delete(document.ref)
+        for ( const document of queryFavoritesSnapshot.docs ) {
+          // Add the favorite into the batch to be deleted
+          batch.delete(document.ref)
+        }
       }
 
       // add the category into the batch to be deleted
@@ -300,7 +298,7 @@ class DbCategories {
         return rejectWithValue('CANT_DELETE_DATA')
       }
     
-    } catch (e) {
+    } catch (err) {
       // Transaction failed
       return rejectWithValue('CANT_DELETE_DATA')
     }

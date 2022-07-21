@@ -1,8 +1,6 @@
 import React, {useState, useRef} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { createCategory, createProduct } from '../store/slices/categories'
-
-// SweetAlert2
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const CreateItems = () => {

@@ -4,8 +4,6 @@ import TextTruncate from 'react-text-truncate'
 import { removeCategory } from '../store/slices/categories'
 import ProductCard from './ProductCard'
 import { toast } from 'react-toastify'
-
-// SweetAlert2
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const CategoryItem = (props) => {

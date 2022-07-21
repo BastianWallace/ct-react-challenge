@@ -74,14 +74,6 @@ export const categoriesSlice = createSlice({
         return cat
       })
     },
-    _hideCategory: (state, {payload}) => {
-      state.list = state.list.filter( cat => {
-        if(cat.id === payload) {
-          cat.hide = true
-        }
-        return cat
-      })
-    },
     _setFavoriteON: (state, {payload}) => {
       const newFavorites = []
       state.list = state.list.map( cat => {
@@ -254,7 +246,7 @@ export const removeProduct = (data) => async (dispatch) => {
 export const removeCategory = (data) => async (dispatch) => {
   return dispatch(_deleteCategory(data)).then( async (result) => {
     if(result?.meta?.requestStatus === 'fulfilled') {
-      dispatch(_hideCategory(data))
+      dispatch(fetchCategories())
     }
     return result
   })

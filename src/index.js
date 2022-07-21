@@ -16,6 +16,9 @@ import 'bootstrap/dist/js/bootstrap.min.js'
 // SweetAlert2
 import 'sweetalert2/dist/sweetalert2.min.css'
 
+// ReactToastify
+import 'react-toastify/dist/ReactToastify.min.css'
+
 // Custom Styles
 import './assets/styles/styles.css'
 

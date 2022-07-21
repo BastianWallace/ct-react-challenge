@@ -3,9 +3,6 @@ import { addToFavorites, removeFromFavorites, changeProdOrder, removeProduct } f
 import { useDispatch, useSelector } from 'react-redux'
 import TextTruncate from 'react-text-truncate'
 import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.min.css'
-
-// SweetAlert2
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const ProductCard = (props) => {
