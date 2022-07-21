@@ -4,8 +4,6 @@ import TextTruncate from 'react-text-truncate'
 import { removeCategory } from '../store/slices/categories'
 import ProductCard from './ProductCard'
 import { toast } from 'react-toastify'
-
-// SweetAlert2
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const CategoryItem = (props) => {
@@ -53,16 +51,18 @@ const CategoryItem = (props) => {
             />
           </div>
           <div className="d-flex">
-            {loadingDelete && (
-              <div className="d-flex justify-content-center ms-3 me-1">
-                <div className="spinner-border" role="status" style={{color:`${textColor}`, width: '1.75rem', height: '1.75rem'}}>
-                  <span className="visually-hidden">Loading...</span>
+            {type !== 'favorites' && (
+              loadingDelete && (
+                <div className="d-flex justify-content-center ms-3 me-1">
+                  <div className="spinner-border" role="status" style={{color:`${textColor}`, width: '1.75rem', height: '1.75rem'}}>
+                    <span className="visually-hidden">Loading...</span>
+                  </div>
                 </div>
-              </div>
-            ) || (
-              <button type="button" className="btn-unstyled fs-5 mx-2" style={{color:`${textColor}`}} onClick={handleDelete}>
-                <i className="bi-trash3"></i>
-              </button>
+              ) || (
+                <button type="button" className="btn-unstyled fs-5 mx-2" style={{color:`${textColor}`}} onClick={handleDelete}>
+                  <i className="bi-trash3"></i>
+                </button>
+              )
             )}
 
             <button 

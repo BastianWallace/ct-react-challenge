@@ -3,9 +3,6 @@ import { addToFavorites, removeFromFavorites, changeProdOrder, removeProduct } f
 import { useDispatch, useSelector } from 'react-redux'
 import TextTruncate from 'react-text-truncate'
 import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.min.css'
-
-// SweetAlert2
 import Swal from 'sweetalert2/dist/sweetalert2.min.js'
 
 const ProductCard = (props) => {
@@ -154,7 +151,7 @@ const ProductCard = (props) => {
       
       <div className="d-flex">
         <div className="col-6 d-flex">
-          {orderNumber > 1 && orderNumber > minOrderNumber && (
+          {type !== 'favorites' && orderNumber > 1 && orderNumber > minOrderNumber && (
             loadingMoveLeft && (
               <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
                 <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
@@ -168,7 +165,7 @@ const ProductCard = (props) => {
             )
           )}
 
-          {orderNumber < maxOrderNumber && (
+          {type !== 'favorites' && orderNumber < maxOrderNumber && (
             loadingMoveRight && (
               <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
                 <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
@@ -185,16 +182,18 @@ const ProductCard = (props) => {
         </div>
 
         <div className="col-6 d-flex justify-content-end">
-          {loadingDelete && (
-            <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
-              <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
-                <span className="visually-hidden">Loading...</span>
+          {type !== 'favorites' && (
+            loadingDelete && (
+              <div className="d-flex justify-content-center mx-2" style={{width: '42px'}}>
+                <div className="spinner-border text-secondary" role="status" style={{width: '2.35rem', height: '2.35rem'}}>
+                  <span className="visually-hidden">Loading...</span>
+                </div>
               </div>
-            </div>
-          ) || (
-            <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleDelete}>
-              <i className="bi-trash3"></i>
-            </button>
+            ) || (
+              <button type="button" className="btn btn-outline-secondary mx-2" onClick={handleDelete}>
+                <i className="bi-trash3"></i>
+              </button>
+            )
           )}
         </div>
       </div>

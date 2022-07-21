@@ -1,7 +1,6 @@
 import React, {useRef} from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { searchByValue } from '../store/slices/categories'
-
 import CategoryItem from './CategoryItem'
 
 const CategoryList = (props) => {

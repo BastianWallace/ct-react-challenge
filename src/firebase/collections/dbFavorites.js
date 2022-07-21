@@ -22,12 +22,6 @@ class DbFavorites {
   }
 
   saveFavorite = async (prodId, rejectWithValue) => {
-    // await new Promise(resolve => {
-    //   setTimeout(() => {
-    //     resolve('resolved')
-    //   }, 2000);
-    // })
-
     try{
       const docId = await addDoc(this.favoritesCollectionRef, {
         productId: prodId,
